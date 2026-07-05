@@ -530,7 +530,54 @@
       startQRScanner();
     }
 
-    function startQRScanner() {
+  function startQRScanner() {
+      // 1. Minta pustaka untuk mendeteksi semua kamera yang ada di HP
+      Html5Qrcode.getCameras().then(devices => {
+        if (devices && devices.length > 0) {
+          // 2. Cari kamera belakang (back/environment) secara otomatis
+          let backCamera = devices.find(device => 
+            device.label.toLowerCase().includes('back') || 
+            device.label.toLowerCase().includes('environment') ||
+            device.label.toLowerCase().includes('belakang')
+          );
+          
+          // Jika tidak spesifik tertulis 'back', gunakan kamera terakhir di array (biasanya kamera utama)
+          const cameraIdToUse = backCamera ? backCamera.id : devices[devices.length - 1].id;
+          
+          // 3. Inisialisasi scanner TANPA UI bawaan agar tidak memunculkan tombol/pilihan drop-down
+          // Gunakan 'reader' sebagai id elemen HTML container-nya
+          qrScannerInstance = new Html5Qrcode("reader");
+          
+          qrScannerInstance.start(
+            cameraIdToUse, 
+            {
+              fps: 10,    // Kecepatan pemindaian per detik
+              qrbox: 200  // Ukuran kotak pemindaian di layar
+            },
+            (decodedText) => {
+              // Jika QR Code berhasil terbaca
+              payload.qr_content = decodedText;
+              qrScannerInstance.stop().then(() => {
+                submitAttendanceData();
+              }).catch(err => console.error(err));
+            },
+            (errorMessage) => {
+              // Abaikan log error pemindaian biasa saat mencari QR
+            }
+          ).catch(err => {
+            // Jika gagal start otomatis, gunakan fallback scanner standar dengan UI
+            fallbackQRScanner();
+          });
+        } else {
+          alert("Kamera tidak ditemukan.");
+        }
+      }).catch(err => {
+        fallbackQRScanner();
+      });
+    }
+
+    // Fungsi cadangan jika otomatisasi gagal total
+    function fallbackQRScanner() {
       qrScannerInstance = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 180 });
       qrScannerInstance.render((decodedText) => {
         payload.qr_content = decodedText;
@@ -538,7 +585,7 @@
         submitAttendanceData();
       }, () => {});
     }
-
+    
     function simulateQRDecode() {
       if(qrScannerInstance) { try { qrScannerInstance.clear(); } catch(e) {} }
       payload.qr_content = "TOKEN_SIMULASI_OK";
