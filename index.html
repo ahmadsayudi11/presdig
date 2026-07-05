@@ -530,42 +530,41 @@
       startQRScanner();
     }
 
-  function startQRScanner() {
-      // 1. Minta pustaka untuk mendeteksi semua kamera yang ada di HP
+function startQRScanner() {
       Html5Qrcode.getCameras().then(devices => {
         if (devices && devices.length > 0) {
-          // 2. Cari kamera belakang (back/environment) secara otomatis
           let backCamera = devices.find(device => 
             device.label.toLowerCase().includes('back') || 
             device.label.toLowerCase().includes('environment') ||
             device.label.toLowerCase().includes('belakang')
           );
           
-          // Jika tidak spesifik tertulis 'back', gunakan kamera terakhir di array (biasanya kamera utama)
           const cameraIdToUse = backCamera ? backCamera.id : devices[devices.length - 1].id;
           
-          // 3. Inisialisasi scanner TANPA UI bawaan agar tidak memunculkan tombol/pilihan drop-down
-          // Gunakan 'reader' sebagai id elemen HTML container-nya
           qrScannerInstance = new Html5Qrcode("reader");
           
           qrScannerInstance.start(
             cameraIdToUse, 
             {
-              fps: 10,    // Kecepatan pemindaian per detik
-              qrbox: 200  // Ukuran kotak pemindaian di layar
+              fps: 10,
+              qrbox: 200
             },
             (decodedText) => {
-              // Jika QR Code berhasil terbaca
+              // 1. Kunci data token QR ke dalam payload terlebih dahulu
               payload.qr_content = decodedText;
-              qrScannerInstance.stop().then(() => {
-                submitAttendanceData();
-              }).catch(err => console.error(err));
+              
+              // 2. LANGSUNG kirim data ke Google Sheets tanpa delay penutupan kamera
+              submitAttendanceData();
+              
+              // 3. Matikan kamera secara aman di latar belakang (background)
+              try {
+                qrScannerInstance.stop().catch(err => console.log("Info: Kamera stop di latar belakang."));
+              } catch(e) {}
             },
             (errorMessage) => {
-              // Abaikan log error pemindaian biasa saat mencari QR
+              // Abaikan error pencarian frame QR biasa
             }
           ).catch(err => {
-            // Jika gagal start otomatis, gunakan fallback scanner standar dengan UI
             fallbackQRScanner();
           });
         } else {
