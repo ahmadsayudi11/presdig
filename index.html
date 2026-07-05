@@ -545,18 +545,20 @@
       submitAttendanceData();
     }
 
-    function submitAttendanceData() {
+   function submitAttendanceData() {
       document.getElementById('pane-scanner').classList.add('hidden');
       document.getElementById('pane-status').classList.remove('hidden');
       
       const targetURL = localStorage.getItem(CONFIG_KEYS.GAS_URL);
+      
+      // Menggunakan form-submission style (Metode paling kompatibel & aman untuk browser HP ke GAS)
       fetch(targetURL, {
         method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // GAS lebih stabil menerima text/plain untuk CORS
         body: JSON.stringify(payload)
       })
-      .then(() => {
+      .then(response => {
+        // Browser HP akan menunggu respons nyata dari server Google
         document.getElementById('status-loading').classList.add('hidden');
         document.getElementById('status-success').classList.remove('hidden');
         document.getElementById('rec-nip').innerText = payload.nip;
@@ -567,7 +569,7 @@
       .catch((err) => {
         document.getElementById('status-loading').classList.add('hidden');
         document.getElementById('status-error').classList.remove('hidden');
-        document.getElementById('error-message').innerText = err.toString();
+        document.getElementById('error-message').innerText = "Gagal terhubung ke server. Periksa internet atau URL script.";
       });
     }
 
