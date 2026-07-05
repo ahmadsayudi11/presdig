@@ -6,13 +6,10 @@
   <title>PresDig SMK MIFTAHUL HIKMAH</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#581c87">
-  <!-- Google Fonts: Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <!-- Tailwind CSS CDN -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- HTML5 QR Code Scanner Library -->
   <script src="https://unpkg.com/html5-qrcode"></script>
   
   <script>
@@ -73,7 +70,6 @@
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800 font-sans flex flex-col antialiased selection:bg-brand-200">
 
-  <!-- Top Navigation Bar -->
   <header class="bg-white border-b border-slate-100 sticky top-0 z-40 backdrop-blur-md bg-white/90">
     <div class="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center space-x-3">
@@ -98,7 +94,6 @@
     </div>
   </header>
 
-  <!-- Step Progress Indicator -->
   <div class="bg-white border-b border-slate-100 py-3 px-4">
     <div class="max-w-md mx-auto flex items-center justify-between text-xs">
       <div id="step-lbl-1" class="flex items-center space-x-2 text-brand-800 font-bold transition-all duration-300">
@@ -122,20 +117,16 @@
     </div>
   </div>
 
-  <!-- Main Container -->
   <main class="flex-1 p-4 flex items-center justify-center">
     <div class="w-full max-w-md bg-white rounded-3xl shadow-xl shadow-slate-100 border border-slate-100 overflow-hidden relative">
       
-      <!-- HEADER CARD DESIGN -->
       <div class="bg-gradient-to-r from-brand-900 to-brand-700 p-6 text-white relative">
         <h2 id="card-title" class="text-xl font-bold tracking-tight">Selamat Datang Bapak/Ibu</h2>
         <p id="card-desc" class="text-xs text-brand-100 mt-1">Silakan masukkan data diri Anda untuk memulai presensi harian.</p>
       </div>
 
-      <!-- BODY SECTIONS -->
       <div class="p-6">
         
-        <!-- ================= STEP 1: IDENTITAS ================= -->
         <div id="pane-identity" class="space-y-5">
           <div class="space-y-2">
             <label for="nip" class="block text-xs font-bold text-slate-500 uppercase tracking-wider">NIP / Kode Pendidik</label>
@@ -187,7 +178,6 @@
           </button>
         </div>
 
-        <!-- ================= STEP 2: VERIFIKASI WAJAH ================= -->
         <div id="pane-camera" class="space-y-4 hidden">
           <div class="relative bg-slate-950 rounded-2xl overflow-hidden aspect-[4/3] flex items-center justify-center border border-slate-800">
             <video id="webcam" autoplay playsinline class="w-full h-full object-cover scale-x-[-1]"></video>
@@ -225,14 +215,13 @@
 
           <button onclick="captureImage()" class="w-full bg-brand-800 hover:bg-brand-900 active:scale-[0.98] text-white font-bold py-3.5 px-4 rounded-2xl transition-all shadow-lg shadow-brand-200 flex items-center justify-center space-x-2 text-sm">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 011.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0118.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
             </svg>
             <span>Verifikasi Wajah & Lanjut</span>
           </button>
         </div>
 
-        <!-- ================= STEP 3: QR SCANNER ================= -->
         <div id="pane-scanner" class="space-y-4 hidden">
           <div class="relative bg-slate-950 rounded-2xl overflow-hidden aspect-square border border-slate-800 max-w-[280px] mx-auto">
             <div id="reader" class="w-full h-full bg-slate-950"></div>
@@ -262,7 +251,6 @@
           </div>
         </div>
 
-        <!-- ================= STATUS SCREEN ================= -->
         <div id="pane-status" class="space-y-5 hidden py-6 text-center">
           <div id="status-loading" class="space-y-4">
             <div class="inline-flex relative">
@@ -317,8 +305,8 @@
               <h3 class="text-md font-bold text-slate-800">Gagal Mencatat Presensi</h3>
               <p id="error-message" class="text-xs text-rose-600 mt-1">Konfigurasi bermasalah.</p>
             </div>
-            <button onclick="resetFlow()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 px-4 rounded-2xl transition text-xs">
-              Coba Lagi
+            <button onclick="retryQRScanner()" class="w-full bg-brand-800 hover:bg-brand-900 text-white font-bold py-3 px-4 rounded-2xl transition text-xs shadow-md shadow-brand-100">
+              Coba Lagi (Scan Ulang)
             </button>
           </div>
         </div>
@@ -327,7 +315,6 @@
     </div>
   </main>
 
-  <!-- CONFIGURATION MODAL -->
   <div id="config-modal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-3xl max-w-sm w-full border border-slate-100 shadow-2xl overflow-hidden">
       <div class="bg-gradient-to-r from-slate-900 to-slate-800 p-5 text-white flex justify-between items-center">
@@ -530,7 +517,7 @@
       startQRScanner();
     }
 
-function startQRScanner() {
+    function startQRScanner() {
       Html5Qrcode.getCameras().then(devices => {
         if (devices && devices.length > 0) {
           let backCamera = devices.find(device => 
@@ -550,13 +537,8 @@ function startQRScanner() {
               qrbox: 200
             },
             (decodedText) => {
-              // 1. Kunci data token QR ke dalam payload terlebih dahulu
               payload.qr_content = decodedText;
-              
-              // 2. LANGSUNG kirim data ke Google Sheets tanpa delay penutupan kamera
               submitAttendanceData();
-              
-              // 3. Matikan kamera secara aman di latar belakang (background)
               try {
                 qrScannerInstance.stop().catch(err => console.log("Info: Kamera stop di latar belakang."));
               } catch(e) {}
@@ -575,7 +557,6 @@ function startQRScanner() {
       });
     }
 
-    // Fungsi cadangan jika otomatisasi gagal total
     function fallbackQRScanner() {
       qrScannerInstance = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 180 });
       qrScannerInstance.render((decodedText) => {
@@ -591,19 +572,22 @@ function startQRScanner() {
       submitAttendanceData();
     }
 
-  function submitAttendanceData() {
+    function submitAttendanceData() {
       document.getElementById('pane-scanner').classList.add('hidden');
       document.getElementById('pane-status').classList.remove('hidden');
       
+      // Memastikan state loading aktif & state error disembunyikan sebelum fetch ulang
+      document.getElementById('status-loading').classList.remove('hidden');
+      document.getElementById('status-error').classList.add('hidden');
+      
       const targetURL = localStorage.getItem(CONFIG_KEYS.GAS_URL);
       
-      // Kirim menggunakan format JSON string murni agar data Base64 foto tidak rusak/terpotong di jalan
       fetch(targetURL, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(payload)
       })
-      .then(response => response.json()) // Baca respons balasan dari server Google
+      .then(response => response.json())
       .then(result => {
         if (result.status === "success") {
           document.getElementById('status-loading').classList.add('hidden');
@@ -613,7 +597,6 @@ function startQRScanner() {
           document.getElementById('rec-time').innerText = new Date().toLocaleTimeString('id-ID') + " WIB";
           document.getElementById('rec-gps').innerText = payload.lat ? "Terkunci" : "Simulasi";
         } else {
-          // Jika backend GAS mengirimkan pesan error spesifik
           document.getElementById('status-loading').classList.add('hidden');
           document.getElementById('status-error').classList.remove('hidden');
           document.getElementById('error-message').innerText = result.message;
@@ -624,6 +607,21 @@ function startQRScanner() {
         document.getElementById('status-error').classList.remove('hidden');
         document.getElementById('error-message').innerText = "Gagal terhubung ke server.";
       });
+    }
+
+    function retryQRScanner() {
+      // 1. Sembunyikan layar status eror keseluruhan
+      document.getElementById('pane-status').classList.add('hidden');
+      document.getElementById('status-error').classList.add('hidden');
+      
+      // 2. Kembalikan judul panel atas ke mode scan
+      document.getElementById('card-title').innerText = "Pindai QR Monitor";
+      
+      // 3. Tampilkan kembali panel kotak kamera scanner
+      document.getElementById('pane-scanner').classList.remove('hidden');
+      
+      // 4. Nyalakan ulang mesin pencari frame QR Code
+      startQRScanner();
     }
 
     function resetFlow() {
