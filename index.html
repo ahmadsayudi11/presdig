@@ -591,31 +591,38 @@ function startQRScanner() {
       submitAttendanceData();
     }
 
-   function submitAttendanceData() {
+  function submitAttendanceData() {
       document.getElementById('pane-scanner').classList.add('hidden');
       document.getElementById('pane-status').classList.remove('hidden');
       
       const targetURL = localStorage.getItem(CONFIG_KEYS.GAS_URL);
       
-      // Menggunakan form-submission style (Metode paling kompatibel & aman untuk browser HP ke GAS)
+      // Kirim menggunakan format JSON string murni agar data Base64 foto tidak rusak/terpotong di jalan
       fetch(targetURL, {
         method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // GAS lebih stabil menerima text/plain untuk CORS
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(payload)
       })
-      .then(response => {
-        // Browser HP akan menunggu respons nyata dari server Google
-        document.getElementById('status-loading').classList.add('hidden');
-        document.getElementById('status-success').classList.remove('hidden');
-        document.getElementById('rec-nip').innerText = payload.nip;
-        document.getElementById('rec-kategori').innerText = payload.kategori;
-        document.getElementById('rec-time').innerText = new Date().toLocaleTimeString('id-ID') + " WIB";
-        document.getElementById('rec-gps').innerText = payload.lat ? "Terkunci" : "Simulasi";
+      .then(response => response.json()) // Baca respons balasan dari server Google
+      .then(result => {
+        if (result.status === "success") {
+          document.getElementById('status-loading').classList.add('hidden');
+          document.getElementById('status-success').classList.remove('hidden');
+          document.getElementById('rec-nip').innerText = payload.nip;
+          document.getElementById('rec-kategori').innerText = payload.kategori;
+          document.getElementById('rec-time').innerText = new Date().toLocaleTimeString('id-ID') + " WIB";
+          document.getElementById('rec-gps').innerText = payload.lat ? "Terkunci" : "Simulasi";
+        } else {
+          // Jika backend GAS mengirimkan pesan error spesifik
+          document.getElementById('status-loading').classList.add('hidden');
+          document.getElementById('status-error').classList.remove('hidden');
+          document.getElementById('error-message').innerText = result.message;
+        }
       })
       .catch((err) => {
         document.getElementById('status-loading').classList.add('hidden');
         document.getElementById('status-error').classList.remove('hidden');
-        document.getElementById('error-message').innerText = "Gagal terhubung ke server. Periksa internet atau URL script.";
+        document.getElementById('error-message').innerText = "Gagal terhubung ke server.";
       });
     }
 
