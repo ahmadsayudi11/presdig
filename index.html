@@ -1,704 +1,419 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>PresDig SMK MIFTAHUL HIKMAH</title>
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#581c87">
-  
-  <!-- Dukungan Ikon Sempurna untuk iOS / iPhone -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="#581c87">
-  <meta name="apple-mobile-web-app-title" content="PresDig SMK">
-  <link rel="apple-touch-icon" href="icon-192.png">
-
-  <!-- Google Fonts: Plus Jakarta Sans -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=300;400;500;600;700;800&display=swap" rel="stylesheet">
-  
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- HTML5 QR Code Scanner Library -->
-  <script src="https://unpkg.com/html5-qrcode"></script>
-  
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Plus Jakarta Sans', 'sans-serif'],
-          },
-          colors: {
-            brand: {
-              50: '#faf5ff',
-              100: '#f3e8ff',
-              200: '#e9d5ff',
-              500: '#a855f7',
-              600: '#9333ea',
-              700: '#7e22ce',
-              800: '#6b21a8',
-              900: '#581c87',
-              950: '#3b0764',
-            }
-          }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PresDig SMK MIFTAHUL HIKMAH</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-      }
-    }
-  </script>
-  <style>
-    @keyframes scan {
-      0% { top: 0%; }
-      50% { top: 100%; }
-      100% { top: 0%; }
-    }
-    .scanner-line {
-      animation: scan 3s linear infinite;
-    }
-    @keyframes shimmer {
-      100% { transform: translateX(100%); }
-    }
-    .shimmer {
-      position: relative;
-      overflow: hidden;
-    }
-    .shimmer::after {
-      position: absolute;
-      top: 0; right: 0; bottom: 0; left: 0;
-      transform: translateX(-100%);
-      background-image: linear-gradient(
-        90deg,
-        rgba(255, 255, 255, 0) 0%,
-        rgba(255, 255, 255, 0.2) 20%,
-        rgba(255, 255, 255, 0.5) 60%,
-        rgba(255, 255, 255, 0) 100%
-      );
-      animation: shimmer 2s infinite;
-      content: '';
-    }
-    /* Mengatasi padding bawah pada HP berponi bawah / gesture navigation Android & iOS */
-    .pb-safe {
-      padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
-    }
-  </style>
+        body {
+            background-color: #f4f6f9;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 15px;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 480px;
+            padding: 25px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #eef2f5;
+            padding-bottom: 15px;
+        }
+        .header h1 {
+            font-size: 22px;
+            color: #1e3a8a;
+            margin-bottom: 5px;
+        }
+        .header p {
+            font-size: 13px;
+            color: #6b7280;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #4b5563;
+        }
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+        .camera-box {
+            width: 100%;
+            background-color: #f3f4f6;
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            overflow: hidden;
+            text-align: center;
+            position: relative;
+            margin-bottom: 15px;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        video, canvas {
+            width: 100%;
+            height: auto;
+            display: none;
+            border-radius: 6px;
+        }
+        .btn {
+            width: 100%;
+            padding: 13px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 10px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .btn-primary {
+            background-color: #2563eb;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+        }
+        .btn-success {
+            background-color: #10b981;
+            color: white;
+        }
+        .btn-success:hover {
+            background-color: #059669;
+        }
+        .btn-secondary {
+            background-color: #6b7280;
+            color: white;
+            font-size: 14px;
+            padding: 10px;
+        }
+        .btn-secondary:hover {
+            background-color: #4b5563;
+        }
+        .btn-danger {
+            background-color: #ef4444;
+            color: white;
+            font-size: 13px;
+            padding: 8px;
+            margin-top: 5px;
+        }
+        .status-location {
+            font-size: 12px;
+            color: #059669;
+            margin-top: 5px;
+            font-weight: 500;
+        }
+        .admin-section {
+            margin-top: 30px;
+            border-top: 2px dashed #e5e7eb;
+            padding-top: 20px;
+            display: none;
+        }
+        .admin-toggle {
+            text-align: center;
+            margin-top: 20px;
+            cursor: pointer;
+            color: #9ca3af;
+            font-size: 12px;
+            text-decoration: underline;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            color: #2563eb;
+            font-weight: 600;
+            margin: 10px 0;
+        }
+    </style>
 </head>
-<body class="bg-slate-50 min-h-screen text-slate-800 font-sans flex flex-col antialiased selection:bg-brand-200 overflow-x-hidden pb-safe">
+<body>
 
-  <!-- Top Navigation Bar -->
-  <header class="bg-white border-b border-slate-100 sticky top-0 z-40 backdrop-blur-md bg-white/90">
-    <div class="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
-      <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 rounded-xl bg-brand-800 flex items-center justify-center shadow-lg shadow-brand-200">
-          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0v6"></path>
-          </svg>
-        </div>
-        <div>
-          <h1 class="text-sm font-bold text-slate-900 tracking-wide">PresDig SMK MIFTAHUL HIKMAH</h1>
-          <p class="text-[10px] text-slate-400 font-semibold tracking-wider uppercase">Portal Staf & Guru</p>
-        </div>
-      </div>
-      <button onclick="toggleConfigModal()" class="p-2 text-slate-400 hover:text-brand-800 rounded-lg transition-colors" title="Konfigurasi Sistem">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-        </svg>
-      </button>
+<div class="container">
+    <div class="header">
+        <h1>PresDig SMK MIFTAHUL HIKMAH</h1>
+        <p>Sistem Presensi Digital Berbasis GPS & Face Capture</p>
     </div>
-  </header>
 
-  <!-- Step Progress Indicator -->
-  <div class="bg-white border-b border-slate-100 py-3 px-4">
-    <div class="max-w-md mx-auto flex items-center justify-between text-xs">
-      <div id="step-lbl-1" class="flex items-center space-x-2 text-brand-800 font-bold transition-all duration-300">
-        <span class="w-5 h-5 rounded-full bg-brand-800 text-white flex items-center justify-center text-[10px]">1</span>
-        <span>Identitas</span>
-      </div>
-      <div class="flex-1 h-[2px] bg-slate-200 mx-3 rounded">
-        <div id="progress-bar-1" class="h-full bg-brand-800 w-0 transition-all duration-500"></div>
-      </div>
-      <div id="step-lbl-2" class="flex items-center space-x-2 text-slate-400 font-semibold transition-all duration-300">
-        <span class="w-5 h-5 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-[10px]">2</span>
-        <span>Wajah</span>
-      </div>
-      <div class="flex-1 h-[2px] bg-slate-200 mx-3 rounded">
-        <div id="progress-bar-2" class="h-full bg-brand-800 w-0 transition-all duration-500"></div>
-      </div>
-      <div id="step-lbl-3" class="flex items-center space-x-2 text-slate-400 font-semibold transition-all duration-300">
-        <span class="w-5 h-5 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-[10px]">3</span>
-        <span>Selesai</span>
-      </div>
-    </div>
-  </div>
+    <div id="loading" class="loading">Sedang memproses, mohon tunggu...</div>
 
-  <!-- Main Container -->
-  <main class="flex-1 p-4 flex items-center justify-center w-full max-w-md mx-auto">
-    <div class="w-full bg-white rounded-3xl shadow-xl shadow-slate-100 border border-slate-100 overflow-hidden relative">
-      
-      <!-- HEADER CARD DESIGN -->
-      <div class="bg-gradient-to-r from-brand-900 to-brand-700 p-6 text-white relative">
-        <h2 id="card-title" class="text-xl font-bold tracking-tight">Selamat Datang Bapak/Ibu</h2>
-        <p id="card-desc" class="text-xs text-brand-100 mt-1">Silakan masukkan data diri Anda untuk memulai presensi harian.</p>
-      </div>
+    <form id="attendanceForm" onsubmit="prosesPresensiNormal(event)">
+        <div class="form-group">
+            <label for="nip">NIP / Kode Staff</label>
+            <input type="text" id="nip" class="form-control" placeholder="Masukkan NIP Anda" required>
+        </div>
 
-      <!-- BODY SECTIONS -->
-      <div class="p-6">
+        <div class="form-group">
+            <label for="kategori">Kategori Kehadiran</label>
+            <select id="kategori" class="form-control" required>
+                <option value="Masuk">Masuk Kerja</option>
+                <option value="Pulang">Pulang Tugas</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Ambil Foto Wajah</label>
+            <div class="camera-box" id="cameraBox">
+                <span id="cameraPlaceholder">Kamera belum aktif</span>
+                <video id="video" autoplay playsinline></video>
+                <canvas id="canvas"></canvas>
+            </div>
+            <button type="button" class="btn btn-secondary" id="btnAktifkanKamera" onclick="inisialisasiKamera()">Buka Kamera</button>
+            <button type="button" class="btn btn-success" id="btnAmbilFoto" onclick="tangkapFoto()" style="display:none;">Ambil Foto</button>
+            <button type="button" class="btn btn-danger" id="btnResetFoto" onclick="resetKamera()" style="display:none;">Foto Ulang</button>
+        </div>
+
+        <div class="form-group">
+            <label>Lokasi GPS</label>
+            <div id="statusGps" class="status-location">Mendeteksi lokasi koordinat...</div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="btnKirim">Kirim Presensi (WA Otomatis)</button>
+    </form>
+
+    <button class="btn btn-secondary" style="background-color: #f59e0b; margin-top: 15px;" onclick="absenBypass()">
+        ⚠️ Jalur Darurat (Bypass Gateway)
+    </button>
+
+    <div class="admin-toggle" onclick="togglePanelAdmin()">Buka Pengaturan URL & PIN Admin</div>
+
+    <div class="admin-section" id="adminPanel">
+        <h3 style="font-size: 14px; margin-bottom: 10px; color: #1f2937;">Konfigurasi Sistem Admin</h3>
         
-        <!-- ================= STEP 1: IDENTITAS ================= -->
-        <div id="pane-identity" class="space-y-5">
-          <div class="space-y-2">
-            <label for="nip" class="block text-xs font-bold text-slate-500 uppercase tracking-wider">NIP / Kode Pendidik</label>
-            <div class="relative">
-              <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                </svg>
-              </span>
-              <input type="text" id="nip" placeholder="Contoh: 19890212009031002" 
-                class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition-all text-sm font-semibold text-slate-800 placeholder-slate-400">
-            </div>
-          </div>
-
-          <div class="space-y-2">
-            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Kategori Presensi</label>
-            <div class="grid grid-cols-2 gap-3">
-              <label class="border-2 border-brand-800 bg-brand-50/50 rounded-2xl p-3 flex items-center space-x-3 cursor-pointer transition-all duration-200 select-none hover:bg-brand-50" id="lbl-masuk">
-                <input type="radio" name="kategori" value="Masuk" checked class="text-brand-800 focus:ring-brand-500 h-4 w-4" onchange="updateKategoriStyle('Masuk')">
-                <div class="flex flex-col">
-                  <span class="text-xs font-bold text-brand-950">Masuk</span>
-                  <span class="text-[10px] text-brand-600 font-medium">Datang Mengajar</span>
-                </div>
-              </label>
-
-              <label class="border-2 border-slate-200 rounded-2xl p-3 flex items-center space-x-3 cursor-pointer transition-all duration-200 select-none hover:bg-slate-50" id="lbl-pulang">
-                <input type="radio" name="kategori" value="Pulang" class="text-brand-800 focus:ring-brand-500 h-4 w-4" onchange="updateKategoriStyle('Pulang')">
-                <div class="flex flex-col">
-                  <span class="text-xs font-bold text-slate-700">Pulang</span>
-                  <span class="text-[10px] text-slate-400 font-medium">Selesai Tugas</span>
-                </div>
-              </label>
-            </div>
-          </div>
-
-          <div id="gps-status" class="flex items-center space-x-3 bg-amber-50 text-amber-800 p-3.5 rounded-2xl border border-amber-100 text-xs font-medium">
-            <span class="animate-pulse flex h-2 w-2 relative">
-              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-              <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
-            </span>
-            <span id="gps-message">Menghubungkan satelit GPS untuk verifikasi wilayah sekolah...</span>
-          </div>
-
-          <button onclick="nextToCamera()" class="shimmer w-full bg-brand-800 hover:bg-brand-900 active:scale-[0.98] text-white font-bold py-3.5 px-4 rounded-2xl transition-all shadow-lg shadow-brand-200 flex items-center justify-center space-x-2 text-sm">
-            <span>Mulai Verifikasi</span>
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-            </svg>
-          </button>
+        <div class="form-group">
+            <label style="font-size: 12px;">URL Web App Google Script</label>
+            <input type="text" id="webAppUrl" class="form-control" style="font-size: 12px; padding: 8px;" placeholder="https://script.google.com/macros/s/.../exec">
         </div>
 
-        <!-- ================= STEP 2: VERIFIKASI WAJAH ================= -->
-        <div id="pane-camera" class="space-y-4 hidden">
-          <div class="relative bg-slate-950 rounded-2xl overflow-hidden aspect-[4/3] flex items-center justify-center border border-slate-800">
-            <video id="webcam" autoplay playsinline class="w-full h-full object-cover scale-x-[-1]"></video>
-            <canvas id="canvas" class="hidden"></canvas>
-            
-            <div class="absolute inset-0 pointer-events-none flex items-center justify-center">
-              <svg class="w-full h-full text-brand-600/30" fill="currentColor" viewBox="0 0 400 300">
-                <defs>
-                  <mask id="mask">
-                    <rect width="100%" height="100%" fill="white" />
-                    <ellipse cx="200" cy="150" rx="65" ry="90" fill="black" />
-                  </mask>
-                </defs>
-                <rect width="100%" height="100%" fill="rgba(15, 23, 42, 0.7)" mask="url(#mask)" />
-                <ellipse cx="200" cy="150" rx="66" ry="91" fill="none" stroke="#a855f7" stroke-width="2" stroke-dasharray="6 4" class="opacity-80" />
-              </svg>
-            </div>
-            
-            <div class="absolute bottom-3 left-3 bg-black/60 backdrop-blur-md text-[10px] text-white px-2.5 py-1 rounded-full font-bold tracking-wider flex items-center space-x-1.5 border border-white/10">
-              <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-              <span>Kamera Aktif</span>
-            </div>
-
-            <div id="camera-fallback-control" class="hidden absolute inset-0 bg-slate-900/95 flex flex-col items-center justify-center p-4 text-center space-y-3">
-              <p class="text-xs text-slate-300 font-medium">Akses kamera fisik terhambat. Klik di bawah untuk simulasi pemindaian wajah.</p>
-              <button onclick="useMockFaceImage()" class="bg-brand-800 hover:bg-brand-900 text-white text-xs font-bold py-2 px-4 rounded-xl transition">
-                Gunakan Simulasi Wajah
-              </button>
-            </div>
-          </div>
-
-          <p class="text-center text-xs text-slate-500 leading-relaxed font-medium">
-            Posisikan wajah Anda tepat di dalam area oval dan pastikan pencahayaan ruangan mencukupi.
-          </p>
-
-          <button onclick="captureImage()" class="w-full bg-brand-800 hover:bg-brand-900 active:scale-[0.98] text-white font-bold py-3.5 px-4 rounded-2xl transition-all shadow-lg shadow-brand-200 flex items-center justify-center space-x-2 text-sm">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 011.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0118.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
-            </svg>
-            <span>Verifikasi Wajah & Lanjut</span>
-          </button>
-        </div>
-
-        <!-- ================= STEP 3: QR SCANNER ================= -->
-        <div id="pane-scanner" class="space-y-4 hidden">
-          <div class="relative bg-slate-950 rounded-2xl overflow-hidden aspect-square border border-slate-800 max-w-[280px] mx-auto">
-            <div id="reader" class="w-full h-full bg-slate-950"></div>
-            <div class="absolute inset-x-0 h-[2px] bg-brand-500 shadow-lg shadow-brand-500 scanner-line pointer-events-none"></div>
-            <div class="absolute inset-0 border-2 border-brand-500/20 m-12 rounded-xl pointer-events-none flex items-center justify-center">
-              <div class="w-6 h-6 border-t-2 border-l-2 border-brand-500 absolute top-0 left-0 rounded-tl-md"></div>
-              <div class="w-6 h-6 border-t-2 border-r-2 border-brand-500 absolute top-0 right-0 rounded-tr-md"></div>
-              <div class="w-6 h-6 border-b-2 border-l-2 border-brand-500 absolute bottom-0 left-0 rounded-bl-md"></div>
-              <div class="w-6 h-6 border-b-2 border-r-2 border-brand-500 absolute bottom-0 right-0 rounded-br-md"></div>
-            </div>
-          </div>
-
-          <div class="text-center space-y-2">
-            <p class="text-xs text-slate-500 leading-relaxed font-medium">
-              Dekatkan ponsel Anda dan arahkan kamera ke monitor gerbang sekolah.
-            </p>
-            <div class="flex items-center justify-center space-x-2">
-              <span class="w-2 h-2 rounded-full bg-indigo-500 animate-ping"></span>
-              <span class="text-[10px] text-brand-700 font-bold tracking-wider uppercase">Menunggu Validasi QR Code</span>
-            </div>
-          </div>
-
-          <div class="pt-2 border-t border-slate-100 flex justify-center">
-            <button onclick="simulateQRDecode()" class="text-[11px] font-semibold text-brand-600 hover:text-brand-900 hover:underline bg-brand-50 px-3 py-1.5 rounded-lg transition-all">
-              Bypass / Simulasi Pindai QR Sukses
-            </button>
-          </div>
-        </div>
-
-        <!-- ================= STATUS SCREEN ================= -->
-        <div id="pane-status" class="space-y-5 hidden py-6 text-center">
-          <div id="status-loading" class="space-y-4">
-            <div class="inline-flex relative">
-              <div class="w-16 h-16 rounded-full border-4 border-brand-100 border-t-brand-800 animate-spin"></div>
-            </div>
-            <div>
-              <h3 class="text-md font-bold text-slate-800">Mendaftarkan Absensi</h3>
-              <p class="text-xs text-slate-400 mt-1">Mengunggah data dan memvalidasi log...</p>
-            </div>
-          </div>
-
-          <div id="status-success" class="space-y-5 hidden">
-            <div class="inline-flex w-16 h-16 rounded-full bg-green-100 text-green-600 items-center justify-center">
-              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
-              </svg>
-            </div>
-            <div class="space-y-1">
-              <h3 class="text-lg font-bold text-slate-800">Presensi Berhasil!</h3>
-              <p class="text-xs text-slate-400">Log kehadiran harian Anda telah tersinkronisasi.</p>
-            </div>
-            <div class="bg-slate-50 border border-slate-100 rounded-2xl p-4 text-left space-y-2 text-xs">
-              <div class="flex justify-between border-b border-slate-200 pb-1.5">
-                <span class="text-slate-400 font-medium">NIP Pendidik</span>
-                <span id="rec-nip" class="font-bold text-slate-800">-</span>
-              </div>
-              <div class="flex justify-between border-b border-slate-200 pb-1.5">
-                <span class="text-slate-400 font-medium">Waktu Kirim</span>
-                <span id="rec-time" class="font-bold text-slate-800">-</span>
-              </div>
-              <div class="flex justify-between border-b border-slate-200 pb-1.5">
-                <span class="text-slate-400 font-medium">Sinyal GPS</span>
-                <span id="rec-gps" class="font-bold text-emerald-600">-</span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-slate-400 font-medium">Kategori</span>
-                <span id="rec-kategori" class="font-bold text-brand-800">-</span>
-              </div>
-            </div>
-            <button onclick="resetFlow()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 px-4 rounded-2xl transition text-xs">
-              Kembali ke Menu Utama
-            </button>
-          </div>
-
-          <div id="status-error" class="space-y-4 hidden">
-            <div class="inline-flex w-16 h-16 rounded-full bg-rose-100 text-rose-600 items-center justify-center">
-              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path>
-              </svg>
-            </div>
-            <div>
-              <h3 class="text-md font-bold text-slate-800">Gagal Mencatat Presensi</h3>
-              <p id="error-message" class="text-xs text-rose-600 mt-1">Konfigurasi bermasalah.</p>
-            </div>
-            <button onclick="retryQRScanner()" class="w-full bg-brand-800 hover:bg-brand-900 text-white font-bold py-3 px-4 rounded-2xl transition text-xs shadow-md shadow-brand-100">
-              Coba Lagi (Scan Ulang)
-            </button>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </main>
-
-  <!-- CONFIGURATION MODAL (DIPROTEKSI PIN & MENDUKUNG UBAH PIN) -->
-  <div id="config-modal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-3xl max-w-sm w-full border border-slate-100 shadow-2xl overflow-hidden">
-      <div class="bg-gradient-to-r from-slate-900 to-slate-800 p-5 text-white flex justify-between items-center">
-        <div>
-          <h3 class="font-bold text-sm tracking-wide">Pengaturan Sistem</h3>
-          <p class="text-[10px] text-slate-400">Konfigurasi koordinat & WhatsApp</p>
-        </div>
-        <button onclick="toggleConfigModal()" class="text-slate-400 hover:text-white transition">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-          </svg>
-        </button>
-      </div>
-      <div class="p-5 space-y-4 text-xs">
-        <div class="space-y-1">
-          <label class="font-bold text-slate-500 uppercase tracking-wider text-[10px]">Google Web App URL</label>
-          <input type="text" id="cfg-gas-url" placeholder="https://script.google.com/macros/s/.../exec"
-            class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-1 focus:ring-brand-500 outline-none font-semibold">
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div class="space-y-1">
-            <label class="font-bold text-slate-500 uppercase tracking-wider text-[10px]">Latitude SMK</label>
-            <input type="number" step="any" id="cfg-lat" placeholder="-6.200000"
-              class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-1 focus:ring-brand-500 outline-none font-semibold">
-          </div>
-          <div class="space-y-1">
-            <label class="font-bold text-slate-500 uppercase tracking-wider text-[10px]">Longitude SMK</label>
-            <input type="number" step="any" id="cfg-lng" placeholder="106.816000"
-              class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-1 focus:ring-brand-500 outline-none font-semibold">
-          </div>
-        </div>
-        <div class="space-y-1">
-          <label class="font-bold text-slate-500 uppercase tracking-wider text-[10px]">Radius Sekolah (Meter)</label>
-          <input type="number" id="cfg-radius" placeholder="50"
-            class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-1 focus:ring-brand-500 outline-none font-semibold">
+        <div class="form-group">
+            <label style="font-size: 12px;">PIN Admin (Untuk Bypass & Pengaturan)</label>
+            <input type="password" id="id-input-pin-pengaturan" class="form-control" style="font-size: 12px; padding: 8px;" placeholder="Masukkan PIN Baru">
         </div>
         
-        <!-- SAKELAR INTEGRASI WHATSAPP GATEWAY -->
-        <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200/60 flex items-center justify-between">
-          <div class="flex flex-col pr-2">
-            <span class="font-bold text-slate-700 text-xs">Kirim WhatsApp Gateway</span>
-            <span class="text-[10px] text-slate-400 font-medium">Kirim notifikasi otomatis ke WA Guru</span>
-          </div>
-          <label class="relative inline-flex items-center cursor-pointer select-none">
-            <input type="checkbox" id="cfg-wa-status" class="sr-only peer">
-            <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
-          </label>
-        </div>
-
-        <!-- FITUR GANTI PIN KEAMANAN -->
-        <div class="pt-3 border-t border-slate-100 flex justify-between items-center">
-          <span class="text-slate-500 font-medium">Kredensial Akses</span>
-          <button type="button" onclick="ubahPinAdmin()" class="text-brand-700 hover:text-brand-900 font-bold hover:underline bg-brand-50 px-3 py-1.5 rounded-xl transition">
-            Ganti PIN Akses
-          </button>
-        </div>
-
-        <button onclick="saveConfiguration()" class="w-full bg-brand-800 hover:bg-brand-900 text-white font-bold py-2.5 rounded-xl transition shadow-md shadow-brand-100">
-          Simpan Seluruh Pengaturan
-        </button>
-      </div>
+        <button type="button" class="btn btn-success" style="font-size: 13px; padding: 8px;" onclick="simpanPengaturanAdmin()">Simpan Pengaturan</button>
     </div>
-  </div>
+</div>
 
-  <footer class="bg-white border-t border-slate-100 py-3 text-center mt-auto">
-    <p class="text-[10px] text-slate-400 font-bold tracking-wider uppercase">&copy; 2026 Tim IT SMK - Presensi Berbasis Serverless</p>
-  </footer>
+<script>
+    let latitude = "";
+    let longitude = "";
+    let base64ImageString = "";
+    let streamObj = null;
 
-  <script>
-    const CONFIG_KEYS = {
-      GAS_URL: 'smk_gas_url',
-      LAT: 'smk_lat',
-      LNG: 'smk_lng',
-      RADIUS: 'smk_radius',
-      WA_STATUS: 'smk_wa_status',
-      ADMIN_PIN: 'smk_admin_pin'
-    };
-
-    let payload = {
-      nip: "",
-      image: "",
-      lat: null,
-      lng: null,
-      qr_content: "",
-      kategori: "Masuk",
-      wa_switch: "OFF"
-    };
-
-    let activeStream = null;
-    let qrScannerInstance = null;
-
+    // Membuka konfigurasi otomatis saat halaman dimuat
     window.onload = function() {
-      // Inisialisasi memori lokal perangkat jika kosong saat pertama dibuka
-      if(!localStorage.getItem(CONFIG_KEYS.GAS_URL)) {
-        localStorage.setItem(CONFIG_KEYS.GAS_URL, "https://script.google.com/macros/s/AKfycbz_MOCK_URL_DEPLOYMENT_ANDA/exec");
-        localStorage.setItem(CONFIG_KEYS.LAT, "-6.200000");
-        localStorage.setItem(CONFIG_KEYS.LNG, "106.816000");
-        localStorage.setItem(CONFIG_KEYS.RADIUS, "50");
-        localStorage.setItem(CONFIG_KEYS.WA_STATUS, "false");
-        localStorage.setItem(CONFIG_KEYS.ADMIN_PIN, "123456"); // PIN bawaan sistem
-      }
-      
-      document.getElementById('cfg-gas-url').value = localStorage.getItem(CONFIG_KEYS.GAS_URL);
-      document.getElementById('cfg-lat').value = localStorage.getItem(CONFIG_KEYS.LAT);
-      document.getElementById('cfg-lng').value = localStorage.getItem(CONFIG_KEYS.LNG);
-      document.getElementById('cfg-radius').value = localStorage.getItem(CONFIG_KEYS.RADIUS);
-      document.getElementById('cfg-wa-status').checked = localStorage.getItem(CONFIG_KEYS.WA_STATUS) === 'true';
-
-      initiateGPSChecking();
+        if (localStorage.getItem('webAppUrl')) {
+            document.getElementById('webAppUrl').value = localStorage.getItem('webAppUrl');
+        }
+        if (localStorage.getItem('pinAdmin')) {
+            document.getElementById('id-input-pin-pengaturan').value = localStorage.getItem('pinAdmin');
+        } else {
+            document.getElementById('id-input-pin-pengaturan').value = "2026"; // PIN Default pertama
+        }
+        dapatkanLokasiGps();
     };
 
-    function toggleConfigModal() {
-      const modal = document.getElementById('config-modal');
-      if (modal.classList.contains('hidden')) {
-        const pinTerdaftar = localStorage.getItem(CONFIG_KEYS.ADMIN_PIN) || "123456";
-        const pinInput = prompt("Masukkan PIN Keamanan IT Admin SMK:");
-        if (pinInput === pinTerdaftar) {
-          modal.classList.remove('hidden');
-        } else if (pinInput !== null) {
-          alert("Akses Ditolak! PIN salah.");
+    function simpanPengaturanAdmin() {
+        const urlValue = document.getElementById('webAppUrl').value.trim();
+        const pinValue = document.getElementById('id-input-pin-pengaturan').value.trim();
+
+        if(!urlValue || !pinValue) {
+            alert("URL Web App dan PIN Admin tidak boleh kosong!");
+            return;
         }
-      } else {
-        modal.classList.add('hidden');
-      }
+
+        localStorage.setItem('webAppUrl', urlValue);
+        localStorage.setItem('pinAdmin', pinValue);
+        alert("Pengaturan Berhasil Disimpan! PIN Bypass otomatis berubah mengikuti PIN baru Anda.");
+        document.getElementById('adminPanel').style.display = 'none';
     }
 
-    function ubahPinAdmin() {
-      const pinLama = localStorage.getItem(CONFIG_KEYS.ADMIN_PIN) || "123456";
-      const konfirmasiPinLama = prompt("Masukkan PIN Admin saat ini untuk verifikasi:");
-      
-      if (konfirmasiPinLama === null) return;
-      if (konfirmasiPinLama !== pinLama) {
-        alert("Verifikasi Gagal! PIN lama salah.");
-        return;
-      }
-      
-      const pinBaru = prompt("Masukkan PIN Baru Anda (Kombinasi angka/huruf rahasia):");
-      if (!pinBaru || pinBaru.trim() === "") {
-        alert("PIN baru tidak boleh kosong!");
-        return;
-      }
-      
-      const konfirmasiPinBaru = prompt("Ketik ulang PIN Baru Anda untuk konfirmasi final:");
-      if (pinBaru !== konfirmasiPinBaru) {
-        alert("Konfirmasi gagal! Ketikan ulang PIN tidak cocok.");
-        return;
-      }
-      
-      localStorage.setItem(CONFIG_KEYS.ADMIN_PIN, pinBaru.trim());
-      alert("PIN Keamanan Admin berhasil diperbarui! Gunakan PIN baru ini mulai sekarang.");
+    function togglePanelAdmin() {
+        const panel = document.getElementById('adminPanel');
+        if (panel.style.display === 'block') {
+            panel.style.display = 'none';
+        } else {
+            const pinSesuai = document.getElementById('id-input-pin-pengaturan').value.trim();
+            const konfirmasiPin = prompt("Masukkan PIN Admin saat ini:");
+            if (konfirmasiPin === pinSesuai) {
+                panel.style.display = 'block';
+            } else if (konfirmasiPin !== null) {
+                alert("PIN Salah! Akses ditolak.");
+            }
+        }
     }
 
-    function saveConfiguration() {
-      localStorage.setItem(CONFIG_KEYS.GAS_URL, document.getElementById('cfg-gas-url').value);
-      localStorage.setItem(CONFIG_KEYS.LAT, document.getElementById('cfg-lat').value);
-      localStorage.setItem(CONFIG_KEYS.LNG, document.getElementById('cfg-lng').value);
-      localStorage.setItem(CONFIG_KEYS.RADIUS, document.getElementById('cfg-radius').value);
-      localStorage.setItem(CONFIG_KEYS.WA_STATUS, document.getElementById('cfg-wa-status').checked.toString());
-      
-      alert('Seluruh konfigurasi berhasil disimpan!');
-      toggleConfigModal();
-      initiateGPSChecking();
+    function dapatkanLokasiGps() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    latitude = position.coords.latitude.toString();
+                    longitude = position.coords.longitude.toString();
+                    document.getElementById('statusGps').innerText = `📍 Terkunci: ${latitude}, ${longitude}`;
+                    document.getElementById('statusGps').style.color = "#059669";
+                }, 
+                function(error) {
+                    document.getElementById('statusGps').innerText = "⚠️ Gagal mendeteksi koordinat GPS.";
+                    document.getElementById('statusGps').style.color = "#ef4444";
+                },
+                { enableHighAccuracy: true }
+            );
+        }
     }
 
-    function updateKategoriStyle(pilihan) {
-      const lblMasuk = document.getElementById('lbl-masuk');
-      const lblPulang = document.getElementById('lbl-pulang');
-      payload.kategori = pilihan;
-      if (pilihan === 'Masuk') {
-        lblMasuk.className = "border-2 border-brand-800 bg-brand-50/50 rounded-2xl p-3 flex items-center space-x-3 cursor-pointer transition-all duration-200 select-none hover:bg-brand-50";
-        lblPulang.className = "border-2 border-slate-200 rounded-2xl p-3 flex items-center space-x-3 cursor-pointer transition-all duration-200 select-none hover:bg-slate-50";
-      } else {
-        lblPulang.className = "border-2 border-brand-800 bg-brand-50/50 rounded-2xl p-3 flex items-center space-x-3 cursor-pointer transition-all duration-200 select-none hover:bg-brand-50";
-        lblMasuk.className = "border-2 border-slate-200 rounded-2xl p-3 flex items-center space-x-3 cursor-pointer transition-all duration-200 select-none hover:bg-slate-50";
-      }
+    async function inisialisasiKamera() {
+        document.getElementById('cameraPlaceholder').innerText = "Mengaktifkan kamera...";
+        try {
+            streamObj = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
+            const video = document.getElementById('video');
+            video.srcObject = streamObj;
+            video.style.display = 'block';
+            document.getElementById('cameraPlaceholder').style.display = 'none';
+            document.getElementById('btnAktifkanKamera').style.display = 'none';
+            document.getElementById('btnAmbilFoto').style.display = 'inline-flex';
+        } catch (err) {
+            alert("Gagal membuka kamera: " + err.message);
+        }
     }
 
-    function initiateGPSChecking() {
-      const gpsBox = document.getElementById('gps-status');
-      const gpsMsg = document.getElementById('gps-message');
-      if (!navigator.geolocation) {
-        gpsMsg.innerText = "Browser tidak mendukung Geolocation.";
-        return;
-      }
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          payload.lat = position.coords.latitude;
-          payload.lng = position.coords.longitude;
-          const targetLat = parseFloat(localStorage.getItem(CONFIG_KEYS.LAT));
-          const targetLng = parseFloat(localStorage.getItem(CONFIG_KEYS.LNG));
-          const limitRadius = parseFloat(localStorage.getItem(CONFIG_KEYS.RADIUS));
-          const dist = calculateDistance(payload.lat, payload.lng, targetLat, targetLng) * 1000;
+    function tangkapFoto() {
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
 
-          if (dist <= limitRadius) {
-            gpsBox.className = "flex items-center space-x-3 bg-emerald-50 text-emerald-800 p-3.5 rounded-2xl border border-emerald-100 text-xs font-medium";
-            gpsMsg.innerText = `Di dalam radius wilayah sekolah (${Math.round(dist)} meter).`;
-          } else {
-            gpsBox.className = "flex items-center space-x-3 bg-amber-50 text-amber-800 p-3.5 rounded-2xl border border-amber-100 text-xs font-medium";
-            gpsMsg.innerText = `Di luar radius wilayah sekolah (${Math.round(dist)}m).`;
-          }
-        },
-        () => {
-          gpsMsg.innerText = "Gagal membaca GPS murni. Menggunakan koordinat default sekolah.";
-          payload.lat = parseFloat(localStorage.getItem(CONFIG_KEYS.LAT));
-          payload.lng = parseFloat(localStorage.getItem(CONFIG_KEYS.LNG));
-        },
-        { enableHighAccuracy: true, timeout: 5000 }
-      );
-    }
-
-    function calculateDistance(lat1, lon1, lat2, lon2) {
-      const R = 6371;
-      const dLat = (lat2 - lat1) * Math.PI / 180;
-      const dLon = (lon2 - lon1) * Math.PI / 180;
-      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
-      return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
-    }
-
-    function nextToCamera() {
-      const nipVal = document.getElementById('nip').value.trim();
-      if (!nipVal) return alert('NIP / Kode Pendidik wajib diisi!');
-      payload.nip = nipVal;
-
-      document.getElementById('card-title').innerText = "Validasi Wajah";
-      document.getElementById('progress-bar-1').className = "h-full bg-brand-800 w-full transition-all duration-500";
-      document.getElementById('pane-identity').classList.add('hidden');
-      document.getElementById('pane-camera').classList.remove('hidden');
-
-      navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
-        .then(stream => {
-          activeStream = stream;
-          document.getElementById('webcam').srcObject = stream;
-        })
-        .catch(() => {
-          document.getElementById('camera-fallback-control').classList.remove('hidden');
-        });
-    }
-
-    function useMockFaceImage() {
-      payload.image = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><circle cx='50' cy='50' r='40' fill='purple'/></svg>";
-      moveToScannerStep();
-    }
-
-    function captureImage() {
-      const video = document.getElementById('webcam');
-      const canvas = document.getElementById('canvas');
-      if (activeStream && video.readyState === video.HAVE_ENOUGH_DATA) {
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
-        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-        payload.image = canvas.toDataURL('image/jpeg', 0.7);
-        activeStream.getTracks().forEach(track => track.stop());
-      } else {
-        useMockFaceImage();
-        return;
-      }
-      moveToScannerStep();
-    }
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        base64ImageString = canvas.toDataURL('image/jpeg');
 
-    function moveToScannerStep() {
-      document.getElementById('card-title').innerText = "Pindai QR Monitor";
-      document.getElementById('progress-bar-2').className = "h-full bg-brand-800 w-full transition-all duration-500";
-      document.getElementById('pane-camera').classList.add('hidden');
-      document.getElementById('pane-scanner').classList.remove('hidden');
-      startQRScanner();
-    }
+        video.style.display = 'none';
+        canvas.style.display = 'block';
 
-    function startQRScanner() {
-      Html5Qrcode.getCameras().then(devices => {
-        if (devices && devices.length > 0) {
-          let backCamera = devices.find(device => 
-            device.label.toLowerCase().includes('back') || 
-            device.label.toLowerCase().includes('environment') ||
-            device.label.toLowerCase().includes('belakang')
-          );
-          const cameraIdToUse = backCamera ? backCamera.id : devices[devices.length - 1].id;
-          qrScannerInstance = new Html5Qrcode("reader");
-          qrScannerInstance.start(
-            cameraIdToUse, 
-            { fps: 10, qrbox: 200 },
-            (decodedText) => {
-              payload.qr_content = decodedText;
-              submitAttendanceData();
-              try { qrScannerInstance.stop(); } catch(e) {}
-            },
-            () => {}
-          ).catch(() => { fallbackQRScanner(); });
-        } else {
-          alert("Kamera perangkat tidak terdeteksi.");
+        if (streamObj) {
+            streamObj.getTracks().forEach(track => track.stop());
         }
-      }).catch(() => { fallbackQRScanner(); });
+        document.getElementById('btnAmbilFoto').style.display = 'none';
+        document.getElementById('btnResetFoto').style.display = 'inline-flex';
     }
 
-    function fallbackQRScanner() {
-      qrScannerInstance = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 180 });
-      qrScannerInstance.render((decodedText) => {
-        payload.qr_content = decodedText;
-        qrScannerInstance.clear();
-        submitAttendanceData();
-      }, () => {});
-    }
-    
-    function simulateQRDecode() {
-      if(qrScannerInstance) { try { qrScannerInstance.clear(); } catch(e) {} }
-      payload.qr_content = "TOKEN_SIMULASI_OK";
-      submitAttendanceData();
+    function resetKamera() {
+        document.getElementById('canvas').style.display = 'none';
+        base64ImageString = "";
+        inisialisasiKamera();
+        document.getElementById('btnResetFoto').style.display = 'none';
     }
 
-    function submitAttendanceData() {
-      document.getElementById('pane-scanner').classList.add('hidden');
-      document.getElementById('pane-status').classList.remove('hidden');
-      document.getElementById('status-loading').classList.remove('hidden');
-      document.getElementById('status-error').classList.add('hidden');
-      
-      // Ambil status sakelar WhatsApp terbaru dari memori lokal HP
-      const statusWaLokal = localStorage.getItem(CONFIG_KEYS.WA_STATUS) === 'true';
-      payload.wa_switch = statusWaLokal ? "ON" : "OFF";
-
-      const targetURL = localStorage.getItem(CONFIG_KEYS.GAS_URL);
-      
-      fetch(targetURL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(payload)
-      })
-      .then(response => response.json())
-      .then(result => {
-        if (result.status === "success") {
-          document.getElementById('status-loading').classList.add('hidden');
-          document.getElementById('status-success').classList.remove('hidden');
-          document.getElementById('rec-nip').innerText = payload.nip;
-          document.getElementById('rec-kategori').innerText = payload.kategori;
-          document.getElementById('rec-time').innerText = new Date().toLocaleTimeString('id-ID') + " WIB";
-          document.getElementById('rec-gps').innerText = payload.lat ? "Terkunci" : "Simulasi";
+    // =======================================================
+    // LOGIKA KRITIKAL: VALIDASI PIN DARURAT SECARA DINAMIS
+    // =======================================================
+    function absenBypass() {
+        // Membaca input nilai PIN dari setting admin secara real-time
+        const elemenPinAdmin = document.getElementById('id-input-pin-pengaturan'); 
+        const pinAdminSkrg = elemenPinAdmin ? elemenPinAdmin.value.trim() : "2026"; 
+        
+        // Meminta PIN
+        const inputUser = prompt("Fitur Dikecualikan. Masukkan PIN Admin:");
+        
+        if (inputUser === null) return; // Klik Batal
+        
+        if (inputUser === pinAdminSkrg) {
+            alert("PIN Valid! Mengirim data presensi bypass ke database...");
+            eksekusiKirimKeGoogleScript(true);
         } else {
-          document.getElementById('status-loading').classList.add('hidden');
-          document.getElementById('status-error').classList.remove('hidden');
-          document.getElementById('error-message').innerText = result.message;
+            alert("PIN Salah! Jalur darurat diblokir.");
         }
-      })
-      .catch(() => {
-        document.getElementById('status-loading').classList.add('hidden');
-        document.getElementById('status-error').classList.remove('hidden');
-        document.getElementById('error-message').innerText = "Gagal terhubung ke server.";
-      });
     }
 
-    function retryQRScanner() {
-      document.getElementById('pane-status').classList.add('hidden');
-      document.getElementById('status-error').classList.add('hidden');
-      document.getElementById('card-title').innerText = "Pindai QR Monitor";
-      document.getElementById('pane-scanner').classList.remove('hidden');
-      startQRScanner();
+    function prosesPresensiNormal(event) {
+        event.preventDefault();
+        if(!base64ImageString) {
+            alert("Wajib mengambil foto wajah terlebih dahulu!");
+            return;
+        }
+        eksekusiKirimKeGoogleScript(false);
     }
 
-    function resetFlow() {
-      location.reload();
+    function eksekusiKirimKeGoogleScript(isBypassActive) {
+        const urlTarget = document.getElementById('webAppUrl').value.trim();
+        const nipValue = document.getElementById('nip').value.trim();
+        const kategoriValue = document.getElementById('kategori').value;
+
+        if (!urlTarget) {
+            alert("Error: URL Web App Google Script belum diisi di halaman admin!");
+            return;
+        }
+
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('btnKirim').disabled = true;
+
+        const payloadData = {
+            nip: nipValue,
+            kategori: kategoriValue,
+            lat: latitude || "0.0",
+            lng: longitude || "0.0",
+            image: base64ImageString,
+            bypass: isBypassActive
+        };
+
+        fetch(urlTarget, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payloadData)
+        })
+        .then(() => {
+            alert(`Sukses! Presensi NIP ${nipValue} (${kategoriValue}) berhasil dicatat.`);
+            document.getElementById('nip').value = "";
+            resetKamera();
+            document.getElementById('canvas').style.display = 'none';
+            document.getElementById('video').style.display = 'none';
+            document.getElementById('cameraPlaceholder').style.display = 'block';
+            document.getElementById('cameraPlaceholder').innerText = "Kamera belum aktif";
+            document.getElementById('btnAktifkanKamera').style.display = 'inline-flex';
+            document.getElementById('btnResetFoto').style.display = 'none';
+        })
+        .catch(err => {
+            alert("Gagal mengirim data: " + err.toString());
+        })
+        .finally(() => {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('btnKirim').disabled = false;
+        });
     }
-  </script>
+</script>
+
 </body>
 </html>
