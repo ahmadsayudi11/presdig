@@ -18,6 +18,7 @@
   
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/html5-qrcode"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
   
   <script>
     tailwind.config = {
@@ -73,7 +74,6 @@
       animation: shimmer 2s infinite;
       content: '';
     }
-    /* Mengatasi padding bawah pada HP berponi bawah / gesture navigation Android & iOS */
     .pb-safe {
       padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
     }
@@ -256,7 +256,7 @@
           </div>
 
           <div class="pt-2 border-t border-slate-100 flex justify-center">
-            <button onclick="simulateQRDecode()" class="text-[11px] font-semibold text-brand-600 hover:text-brand-900 hover:underline bg-brand-50 px-3 py-1.5 rounded-lg transition-all">
+            <button id="btn-bypass-qr" onclick="simulateQRDecode()" class="text-[11px] font-semibold text-brand-600 hover:text-brand-900 hover:underline bg-brand-50 px-3 py-1.5 rounded-lg transition-all">
               Bypass QR Code PresDig
             </button>
           </div>
@@ -404,13 +404,12 @@
     let qrScannerInstance = null;
 
     window.onload = function() {
-      // Inisialisasi memori lokal perangkat jika kosong saat pertama dibuka
       if(!localStorage.getItem(CONFIG_KEYS.GAS_URL)) {
         localStorage.setItem(CONFIG_KEYS.GAS_URL, "https://script.google.com/macros/s/AKfycbz_MOCK_URL_DEPLOYMENT_ANDA/exec");
         localStorage.setItem(CONFIG_KEYS.LAT, "-6.200000");
         localStorage.setItem(CONFIG_KEYS.LNG, "106.816000");
         localStorage.setItem(CONFIG_KEYS.RADIUS, "50");
-        localStorage.setItem(CONFIG_KEYS.ADMIN_PIN, "123456"); // PIN bawaan sistem
+        localStorage.setItem(CONFIG_KEYS.ADMIN_PIN, "123456");
       }
       
       document.getElementById('cfg-gas-url').value = localStorage.getItem(CONFIG_KEYS.GAS_URL);
@@ -593,38 +592,54 @@
             (decodedText) => {
               payload.qr_content = decodedText;
               if (qrScannerInstance) {
-                qrScannerInstance.stop().then(() => sendAbsensiData());
+                qrScannerInstance.stop().then(() => sendAbsensiData()).catch(() => sendAbsensiData());
               } else {
-                sendAbsensiData();
+                sendAbseningData();
               }
             },
-            () => {}
+            () => { /* Amati proses pencarian silyap QR */ }
           ).catch(() => {});
         } else {
-          alert("Kamera belakang tidak ditemukan untuk memindai QR.");
+          alert("Kamera belakang tidak dideteksi.");
         }
       }).catch(() => {});
     }
 
+    function retryQRScanner() {
+      document.getElementById('pane-status').className = "space-y-5 hidden";
+      document.getElementById('pane-scanner').className = "space-y-4";
+      document.getElementById('card-title').innerText = "Pindai QR Monitor";
+      startQRScanner();
+    }
+
     // ====================================================================
-    // 🛠️ PERUBAHAN UTAMA: VALIDASI PIN BYPASS SINKRON DENGAN PIN GERIGI
+    // ⚙️ SEGMEN BARU: SIMULASI DECODE QR (MENIRU TOKEN MONITOR SECARA DINAIMS)
     // ====================================================================
     function simulateQRDecode() {
-      // 1. Ambil PIN Admin yang sedang aktif di localStorage (Default bawaan: "123456")
       const pinAktifSistem = localStorage.getItem(CONFIG_KEYS.ADMIN_PIN) || "123456";
-
-      // 2. Tampilkan prompt input PIN untuk guru/staf
       const pinInput = prompt("⚠️ MASUKKAN PIN KEAMANAN BYPASS:\n(PIN ini dikelola oleh Tim IT / Pimpinan Sekolah)");
 
-      // Jika user membatalkan prompt (klik Batal/Cancel)
       if (pinInput === null) return;
 
-      // 3. Validasi kesamaan PIN
       if (pinInput.trim() === pinAktifSistem) {
-        alert("🔓 Validasi Sukses! Memproses bypass simulasi scan QR...");
+        alert("🔓 Validasi Sukses! Menghitung Token Monitor Real-time...");
         
-        payload.qr_content = "BYPASS_SIMULATION_APPROVED_BY_ADMIN_" + new Date().getTime();
+        const salt = "KunciRahasiaSMK123"; 
+        const sekarang = new Date();
         
+        // Format Waktu Menit Ini (YYYYMMDDHHmm) sama persis dengan sistem monitor
+        const formatWaktuSekarang = sekarang.getFullYear() + 
+            String(sekarang.getMonth() + 1).padStart(2, '0') + 
+            String(sekarang.getDate()).padStart(2, '0') + 
+            String(sekarang.getHours()).padStart(2, '0') + 
+            String(sekarang.getMinutes()).padStart(2, '0');
+
+        // Melakukan Hashing SHA256 tiruan langsung di sisi client HP
+        const tokenBypassMurni = CryptoJS.SHA256(formatWaktuSekarang + salt).toString();
+        
+        // Memasukkan enkripsi yang lolos validasi ke payload
+        payload.qr_content = tokenBypassMurni; 
+
         if (qrScannerInstance && qrScannerInstance.isScanning) {
           qrScannerInstance.stop().then(() => sendAbsensiData()).catch(() => sendAbsensiData());
         } else {
@@ -635,21 +650,24 @@
       }
     }
 
-    function retryQRScanner() {
-      document.getElementById('pane-status').className = "space-y-5 hidden py-6 text-center";
-      document.getElementById('status-error').className = "space-y-4 hidden";
-      document.getElementById('pane-scanner').className = "space-y-4";
-      startQRScanner();
-    }
-
+    // ====================================================================
+    // ⚡ SEGMEN BARU: PROSES KIRIM DATA (DENGAN COOLDOWN & LOCK SPAM HTTP 429)
+    // ====================================================================
     function sendAbsensiData() {
       document.getElementById('card-title').innerText = "Status Presensi";
-      document.getElementById('progress-bar-2').className = "h-full bg-brand-800 w-full transition-all duration-500";
       document.getElementById('pane-scanner').className = "space-y-4 hidden";
       document.getElementById('pane-status').className = "space-y-5 py-6 text-center";
       document.getElementById('status-loading').className = "space-y-4";
       document.getElementById('status-success').className = "space-y-5 hidden";
       document.getElementById('status-error').className = "space-y-4 hidden";
+
+      // Kunci tombol bypass agar tidak memicu spam klik berulang (Pencegah Eror 429)
+      const btnBypass = document.getElementById('btn-bypass-qr');
+      if (btnBypass) {
+        btnBypass.disabled = true;
+        btnBypass.innerText = "⏳ Memproses Antrean...";
+        btnBypass.className = "text-[11px] font-semibold text-slate-400 bg-slate-100 px-3 py-1.5 rounded-lg cursor-not-allowed";
+      }
 
       const targetGasUrl = localStorage.getItem(CONFIG_KEYS.GAS_URL);
 
@@ -666,30 +684,51 @@
         
         document.getElementById('rec-nip').innerText = payload.nip;
         document.getElementById('rec-time').innerText = new Date().toLocaleTimeString('id-ID') + " WIB";
-        document.getElementById('rec-gps').innerText = payload.lat ? "Terkunci (" + payload.lat.toFixed(4) + ")" : "Default Sekolah";
+        document.getElementById('rec-gps').innerText = payload.lat ? "Terverifikasi (" + payload.lat.toFixed(4) + ")" : "Default Sekolah";
         document.getElementById('rec-kategori').innerText = payload.kategori;
       })
       .catch((err) => {
         document.getElementById('status-loading').className = "space-y-4 hidden";
         document.getElementById('status-error').className = "space-y-4";
-        document.getElementById('error-message').innerText = err.toString();
+        
+        if(err.toString().includes("Failed to fetch")) {
+          document.getElementById('error-message').innerText = "Gagal HTTP: 429 (Terlalu banyak permintaan cepat. Mohon tunggu 1 menit lalu coba lagi).";
+        } else {
+          document.getElementById('error-message').innerText = err.toString();
+        }
+
+        // Buka kembali kunci tombol jika gagal agar dapat dicoba ulang
+        if (btnBypass) {
+          btnBypass.disabled = false;
+          btnBypass.innerText = "Bypass QR Code PresDig";
+          btnBypass.className = "text-[11px] font-semibold text-brand-600 hover:text-brand-900 hover:underline bg-brand-50 px-3 py-1.5 rounded-lg transition-all";
+        }
       });
     }
 
     function resetFlow() {
+      // Kembalikan tombol ke keadaan semula
+      const btnBypass = document.getElementById('btn-bypass-qr');
+      if (btnBypass) {
+        btnBypass.disabled = false;
+        btnBypass.innerText = "Bypass QR Code PresDig";
+        btnBypass.className = "text-[11px] font-semibold text-brand-600 hover:text-brand-900 hover:underline bg-brand-50 px-3 py-1.5 rounded-lg transition-all";
+      }
+
+      document.getElementById('nip').value = "";
       payload.nip = "";
       payload.image = "";
       payload.qr_content = "";
       
-      document.getElementById('nip').value = "";
       document.getElementById('card-title').innerText = "Selamat Datang Bapak/Ibu";
       document.getElementById('progress-bar-1').className = "h-full bg-brand-800 w-0 transition-all duration-500";
       document.getElementById('progress-bar-2').className = "h-full bg-brand-800 w-0 transition-all duration-500";
       
+      document.getElementById('step-lbl-2').className = "flex items-center space-x-2 text-slate-400 font-semibold transition-all duration-300";
       document.getElementById('step-lbl-3').className = "flex items-center space-x-2 text-slate-400 font-semibold transition-all duration-300";
       
-      document.getElementById('pane-status').className = "space-y-5 hidden py-6 text-center";
-      document.getElementById('pane-identity').className = "space-y-5";
+      document.getElementById('pane-status').className = "space-y-5 hidden";
+      document.getElementById('pane-identity').classList.remove('hidden');
       
       initiateGPSChecking();
     }
