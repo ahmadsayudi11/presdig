@@ -257,7 +257,7 @@
 
           <div class="pt-2 border-t border-slate-100 flex justify-center">
             <button onclick="simulateQRDecode()" class="text-[11px] font-semibold text-brand-600 hover:text-brand-900 hover:underline bg-brand-50 px-3 py-1.5 rounded-lg transition-all">
-              Bypass / Simulasi Pindai QR Sukses
+              Bypass QR Code PresDig
             </button>
           </div>
         </div>
@@ -378,7 +378,7 @@
   </div>
 
   <footer class="bg-white border-t border-slate-100 py-3 text-center mt-auto">
-    <p class="text-[10px] text-slate-400 font-bold tracking-wider uppercase">&copy; 2026 Tim IT SMK - Presensi Berbasis Serverless</p>
+    <p class="text-[10px] text-slate-400 font-bold tracking-wider uppercase">&copy; 2026 Tim IT SMK - PresDig SMK MIFTAHUL HIKMAH</p>
   </footer>
 
   <script>
@@ -572,8 +572,8 @@
     function moveToScannerStep() {
       document.getElementById('card-title').innerText = "Pindai QR Monitor";
       document.getElementById('progress-bar-2').className = "h-full bg-brand-800 w-full transition-all duration-500";
-      document.getElementById('pane-camera').classList.add('hidden');
-      document.getElementById('pane-scanner').classList.remove('hidden');
+      document.getElementById('pane-camera').className = "space-y-4 hidden";
+      document.getElementById('pane-scanner').className = "space-y-4";
       startQRScanner();
     }
 
@@ -592,82 +592,106 @@
             { fps: 10, qrbox: 200 },
             (decodedText) => {
               payload.qr_content = decodedText;
-              submitAttendanceData();
-              try { qrScannerInstance.stop(); } catch(e) {}
+              if (qrScannerInstance) {
+                qrScannerInstance.stop().then(() => sendAbsensiData());
+              } else {
+                sendAbsensiData();
+              }
             },
             () => {}
-          ).catch(() => { fallbackQRScanner(); });
+          ).catch(() => {});
         } else {
-          alert("Kamera perangkat tidak terdeteksi.");
+          alert("Kamera belakang tidak ditemukan untuk memindai QR.");
         }
-      }).catch(() => { fallbackQRScanner(); });
+      }).catch(() => {});
     }
 
-    function fallbackQRScanner() {
-      qrScannerInstance = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 180 });
-      qrScannerInstance.render((decodedText) => {
-        payload.qr_content = decodedText;
-        qrScannerInstance.clear();
-        submitAttendanceData();
-      }, () => {});
-    }
-    
+    // ====================================================================
+    // 🛠️ PERUBAHAN UTAMA: VALIDASI PIN BYPASS SINKRON DENGAN PIN GERIGI
+    // ====================================================================
     function simulateQRDecode() {
-      if(qrScannerInstance) { try { qrScannerInstance.clear(); } catch(e) {} }
-      payload.qr_content = "TOKEN_SIMULASI_OK";
-      submitAttendanceData();
-    }
+      // 1. Ambil PIN Admin yang sedang aktif di localStorage (Default bawaan: "123456")
+      const pinAktifSistem = localStorage.getItem(CONFIG_KEYS.ADMIN_PIN) || "123456";
 
-    function submitAttendanceData() {
-      document.getElementById('pane-scanner').classList.add('hidden');
-      document.getElementById('pane-status').classList.remove('hidden');
-      document.getElementById('status-loading').classList.remove('hidden');
-      document.getElementById('status-error').classList.add('hidden');
-      
-      // ================================================================
-      // SEKARANG WA_SWITCH DISET "ON" SECARA PERMANEN (TANPA TOGGLE HP)
-      // ================================================================
-      payload.wa_switch = "ON";
+      // 2. Tampilkan prompt input PIN untuk guru/staf
+      const pinInput = prompt("⚠️ MASUKKAN PIN KEAMANAN BYPASS:\n(PIN ini dikelola oleh Tim IT / Pimpinan Sekolah)");
 
-      const targetURL = localStorage.getItem(CONFIG_KEYS.GAS_URL);
-      
-      fetch(targetURL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(payload)
-      })
-      .then(response => response.json())
-      .then(result => {
-        if (result.status === "success") {
-          document.getElementById('status-loading').classList.add('hidden');
-          document.getElementById('status-success').classList.remove('hidden');
-          document.getElementById('rec-nip').innerText = payload.nip;
-          document.getElementById('rec-kategori').innerText = payload.kategori;
-          document.getElementById('rec-time').innerText = new Date().toLocaleTimeString('id-ID') + " WIB";
-          document.getElementById('rec-gps').innerText = payload.lat ? "Terkunci" : "Simulasi";
+      // Jika user membatalkan prompt (klik Batal/Cancel)
+      if (pinInput === null) return;
+
+      // 3. Validasi kesamaan PIN
+      if (pinInput.trim() === pinAktifSistem) {
+        alert("🔓 Validasi Sukses! Memproses bypass simulasi scan QR...");
+        
+        payload.qr_content = "BYPASS_SIMULATION_APPROVED_BY_ADMIN_" + new Date().getTime();
+        
+        if (qrScannerInstance && qrScannerInstance.isScanning) {
+          qrScannerInstance.stop().then(() => sendAbsensiData()).catch(() => sendAbsensiData());
         } else {
-          document.getElementById('status-loading').classList.add('hidden');
-          document.getElementById('status-error').classList.remove('hidden');
-          document.getElementById('error-message').innerText = result.message;
+          sendAbsensiData();
         }
-      })
-      .catch(() => {
-        document.getElementById('status-loading').classList.add('hidden');
-        document.getElementById('status-error').classList.remove('hidden');
-        document.getElementById('error-message').innerText = "Gagal terhubung ke server.";
-      });
+      } else {
+        alert("❌ PIN Keamanan Salah! Akses bypass ditolak.");
+      }
     }
 
     function retryQRScanner() {
-      document.getElementById('pane-status').classList.add('hidden');
-      document.getElementById('status-error').classList.add('hidden');
-      document.getElementById('card-title').innerText = "Pindai QR Monitor";
-      document.getElementById('pane-scanner').classList.remove('hidden');
+      document.getElementById('pane-status').className = "space-y-5 hidden py-6 text-center";
+      document.getElementById('status-error').className = "space-y-4 hidden";
+      document.getElementById('pane-scanner').className = "space-y-4";
       startQRScanner();
     }
 
+    function sendAbsensiData() {
+      document.getElementById('card-title').innerText = "Status Presensi";
+      document.getElementById('progress-bar-2').className = "h-full bg-brand-800 w-full transition-all duration-500";
+      document.getElementById('pane-scanner').className = "space-y-4 hidden";
+      document.getElementById('pane-status').className = "space-y-5 py-6 text-center";
+      document.getElementById('status-loading').className = "space-y-4";
+      document.getElementById('status-success').className = "space-y-5 hidden";
+      document.getElementById('status-error').className = "space-y-4 hidden";
+
+      const targetGasUrl = localStorage.getItem(CONFIG_KEYS.GAS_URL);
+
+      fetch(targetGasUrl, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      .then(() => {
+        document.getElementById('status-loading').className = "space-y-4 hidden";
+        document.getElementById('status-success').className = "space-y-5";
+        document.getElementById('step-lbl-3').className = "flex items-center space-x-2 text-brand-800 font-bold transition-all duration-300";
+        
+        document.getElementById('rec-nip').innerText = payload.nip;
+        document.getElementById('rec-time').innerText = new Date().toLocaleTimeString('id-ID') + " WIB";
+        document.getElementById('rec-gps').innerText = payload.lat ? "Terkunci (" + payload.lat.toFixed(4) + ")" : "Default Sekolah";
+        document.getElementById('rec-kategori').innerText = payload.kategori;
+      })
+      .catch((err) => {
+        document.getElementById('status-loading').className = "space-y-4 hidden";
+        document.getElementById('status-error').className = "space-y-4";
+        document.getElementById('error-message').innerText = err.toString();
+      });
+    }
+
     function resetFlow() {
-      location.reload();
+      payload.nip = "";
+      payload.image = "";
+      payload.qr_content = "";
+      
+      document.getElementById('nip').value = "";
+      document.getElementById('card-title').innerText = "Selamat Datang Bapak/Ibu";
+      document.getElementById('progress-bar-1').className = "h-full bg-brand-800 w-0 transition-all duration-500";
+      document.getElementById('progress-bar-2').className = "h-full bg-brand-800 w-0 transition-all duration-500";
+      
+      document.getElementById('step-lbl-3').className = "flex items-center space-x-2 text-slate-400 font-semibold transition-all duration-300";
+      
+      document.getElementById('pane-status').className = "space-y-5 hidden py-6 text-center";
+      document.getElementById('pane-identity').className = "space-y-5";
+      
+      initiateGPSChecking();
     }
   </script>
 </body>
