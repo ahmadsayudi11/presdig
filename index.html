@@ -7,20 +7,16 @@
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#581c87">
   
-  <!-- Dukungan Ikon Sempurna untuk iOS / iPhone -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="#581c87">
   <meta name="apple-mobile-web-app-title" content="PresDig SMK">
-  <link rel="apple-touch-icon" href="icon-192.png">
+  <link class="apple-touch-icon" href="icon-192.png">
 
-  <!-- Google Fonts: Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=300;400;500;600;700;800&display=swap" rel="stylesheet">
   
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- HTML5 QR Code Scanner Library -->
   <script src="https://unpkg.com/html5-qrcode"></script>
   
   <script>
@@ -85,7 +81,6 @@
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800 font-sans flex flex-col antialiased selection:bg-brand-200 overflow-x-hidden pb-safe">
 
-  <!-- Top Navigation Bar -->
   <header class="bg-white border-b border-slate-100 sticky top-0 z-40 backdrop-blur-md bg-white/90">
     <div class="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center space-x-3">
@@ -110,7 +105,6 @@
     </div>
   </header>
 
-  <!-- Step Progress Indicator -->
   <div class="bg-white border-b border-slate-100 py-3 px-4">
     <div class="max-w-md mx-auto flex items-center justify-between text-xs">
       <div id="step-lbl-1" class="flex items-center space-x-2 text-brand-800 font-bold transition-all duration-300">
@@ -134,20 +128,16 @@
     </div>
   </div>
 
-  <!-- Main Container -->
   <main class="flex-1 p-4 flex items-center justify-center w-full max-w-md mx-auto">
     <div class="w-full bg-white rounded-3xl shadow-xl shadow-slate-100 border border-slate-100 overflow-hidden relative">
       
-      <!-- HEADER CARD DESIGN -->
       <div class="bg-gradient-to-r from-brand-900 to-brand-700 p-6 text-white relative">
         <h2 id="card-title" class="text-xl font-bold tracking-tight">Selamat Datang Bapak/Ibu</h2>
         <p id="card-desc" class="text-xs text-brand-100 mt-1">Silakan masukkan data diri Anda untuk memulai presensi harian.</p>
       </div>
 
-      <!-- BODY SECTIONS -->
       <div class="p-6">
         
-        <!-- ================= STEP 1: IDENTITAS ================= -->
         <div id="pane-identity" class="space-y-5">
           <div class="space-y-2">
             <label for="nip" class="block text-xs font-bold text-slate-500 uppercase tracking-wider">NIP / Kode Pendidik</label>
@@ -199,7 +189,6 @@
           </button>
         </div>
 
-        <!-- ================= STEP 2: VERIFIKASI WAJAH ================= -->
         <div id="pane-camera" class="space-y-4 hidden">
           <div class="relative bg-slate-950 rounded-2xl overflow-hidden aspect-[4/3] flex items-center justify-center border border-slate-800">
             <video id="webcam" autoplay playsinline class="w-full h-full object-cover scale-x-[-1]"></video>
@@ -244,7 +233,6 @@
           </button>
         </div>
 
-        <!-- ================= STEP 3: QR SCANNER ================= -->
         <div id="pane-scanner" class="space-y-4 hidden">
           <div class="relative bg-slate-950 rounded-2xl overflow-hidden aspect-square border border-slate-800 max-w-[280px] mx-auto">
             <div id="reader" class="w-full h-full bg-slate-950"></div>
@@ -259,7 +247,7 @@
 
           <div class="text-center space-y-2">
             <p class="text-xs text-slate-500 leading-relaxed font-medium">
-              Dekatkan ponsel Anda dan arahkan kamera ke monitor gerbang sekolah.
+              Dekatkan ponsel Anda dan arahkan kamera ke monitor sekolah.
             </p>
             <div class="flex items-center justify-center space-x-2">
               <span class="w-2 h-2 rounded-full bg-indigo-500 animate-ping"></span>
@@ -274,7 +262,6 @@
           </div>
         </div>
 
-        <!-- ================= STATUS SCREEN ================= -->
         <div id="pane-status" class="space-y-5 hidden py-6 text-center">
           <div id="status-loading" class="space-y-4">
             <div class="inline-flex relative">
@@ -339,13 +326,12 @@
     </div>
   </main>
 
-  <!-- CONFIGURATION MODAL (DIPROTEKSI PIN & MENDUKUNG UBAH PIN) -->
   <div id="config-modal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-3xl max-w-sm w-full border border-slate-100 shadow-2xl overflow-hidden">
       <div class="bg-gradient-to-r from-slate-900 to-slate-800 p-5 text-white flex justify-between items-center">
         <div>
           <h3 class="font-bold text-sm tracking-wide">Pengaturan Sistem</h3>
-          <p class="text-[10px] text-slate-400">Konfigurasi koordinat & WhatsApp</p>
+          <p class="text-[10px] text-slate-400">Konfigurasi koordinat & server</p>
         </div>
         <button onclick="toggleConfigModal()" class="text-slate-400 hover:text-white transition">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -376,20 +362,7 @@
           <input type="number" id="cfg-radius" placeholder="50"
             class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-1 focus:ring-brand-500 outline-none font-semibold">
         </div>
-        
-        <!-- SAKELAR INTEGRASI WHATSAPP GATEWAY -->
-        <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200/60 flex items-center justify-between">
-          <div class="flex flex-col pr-2">
-            <span class="font-bold text-slate-700 text-xs">Kirim WhatsApp Gateway</span>
-            <span class="text-[10px] text-slate-400 font-medium">Kirim notifikasi otomatis ke WA Guru</span>
-          </div>
-          <label class="relative inline-flex items-center cursor-pointer select-none">
-            <input type="checkbox" id="cfg-wa-status" class="sr-only peer">
-            <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
-          </label>
-        </div>
 
-        <!-- FITUR GANTI PIN KEAMANAN -->
         <div class="pt-3 border-t border-slate-100 flex justify-between items-center">
           <span class="text-slate-500 font-medium">Kredensial Akses</span>
           <button type="button" onclick="ubahPinAdmin()" class="text-brand-700 hover:text-brand-900 font-bold hover:underline bg-brand-50 px-3 py-1.5 rounded-xl transition">
@@ -414,7 +387,6 @@
       LAT: 'smk_lat',
       LNG: 'smk_lng',
       RADIUS: 'smk_radius',
-      WA_STATUS: 'smk_wa_status',
       ADMIN_PIN: 'smk_admin_pin'
     };
 
@@ -438,7 +410,6 @@
         localStorage.setItem(CONFIG_KEYS.LAT, "-6.200000");
         localStorage.setItem(CONFIG_KEYS.LNG, "106.816000");
         localStorage.setItem(CONFIG_KEYS.RADIUS, "50");
-        localStorage.setItem(CONFIG_KEYS.WA_STATUS, "false");
         localStorage.setItem(CONFIG_KEYS.ADMIN_PIN, "123456"); // PIN bawaan sistem
       }
       
@@ -446,7 +417,6 @@
       document.getElementById('cfg-lat').value = localStorage.getItem(CONFIG_KEYS.LAT);
       document.getElementById('cfg-lng').value = localStorage.getItem(CONFIG_KEYS.LNG);
       document.getElementById('cfg-radius').value = localStorage.getItem(CONFIG_KEYS.RADIUS);
-      document.getElementById('cfg-wa-status').checked = localStorage.getItem(CONFIG_KEYS.WA_STATUS) === 'true';
 
       initiateGPSChecking();
     };
@@ -497,7 +467,6 @@
       localStorage.setItem(CONFIG_KEYS.LAT, document.getElementById('cfg-lat').value);
       localStorage.setItem(CONFIG_KEYS.LNG, document.getElementById('cfg-lng').value);
       localStorage.setItem(CONFIG_KEYS.RADIUS, document.getElementById('cfg-radius').value);
-      localStorage.setItem(CONFIG_KEYS.WA_STATUS, document.getElementById('cfg-wa-status').checked.toString());
       
       alert('Seluruh konfigurasi berhasil disimpan!');
       toggleConfigModal();
@@ -655,9 +624,10 @@
       document.getElementById('status-loading').classList.remove('hidden');
       document.getElementById('status-error').classList.add('hidden');
       
-      // Ambil status sakelar WhatsApp terbaru dari memori lokal HP
-      const statusWaLokal = localStorage.getItem(CONFIG_KEYS.WA_STATUS) === 'true';
-      payload.wa_switch = statusWaLokal ? "ON" : "OFF";
+      // ================================================================
+      // SEKARANG WA_SWITCH DISET "ON" SECARA PERMANEN (TANPA TOGGLE HP)
+      // ================================================================
+      payload.wa_switch = "ON";
 
       const targetURL = localStorage.getItem(CONFIG_KEYS.GAS_URL);
       
