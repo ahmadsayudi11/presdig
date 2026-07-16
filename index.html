@@ -443,7 +443,9 @@
       }, 3500);
     }
 
-    window.onload = function() {
+    // GANTI window.onload LAMA DENGAN INI
+    document.addEventListener("DOMContentLoaded", function() {
+      // 1. Muat konfigurasi dasar secara instan dari LocalStorage
       if(!localStorage.getItem(CONFIG_KEYS.GAS_URL)) {
         localStorage.setItem(CONFIG_KEYS.GAS_URL, "https://script.google.com/macros/s/AKfycbyHaNmpOkuqxgjfmF0x5dwG0ge0TXdc0jRWlEqWhggPAriW2fsNEx0sX7mrg-kVEWjK/exec");
         localStorage.setItem(CONFIG_KEYS.LAT, "-7.0554952");
@@ -457,10 +459,11 @@
       document.getElementById('cfg-lng').value = localStorage.getItem(CONFIG_KEYS.LNG);
       document.getElementById('cfg-radius').value = localStorage.getItem(CONFIG_KEYS.RADIUS);
 
-      initiateGPSChecking();
-      muatJadwalMengajarHarian();
-    };
-    
+      // 2. Jalankan penarikan data secara paralel (tidak memblokir rendering halaman)
+      setTimeout(muatJadwalMengajarHarian, 50);
+      setTimeout(initiateGPSChecking, 200);
+    });
+  
 function muatJadwalMengajarHarian() {
       const listContainer = document.getElementById("list-guru-hari-ini");
       const urlGas = localStorage.getItem(CONFIG_KEYS.GAS_URL);
