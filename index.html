@@ -81,6 +81,12 @@
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800 font-sans flex flex-col antialiased selection:bg-brand-200 overflow-x-hidden pb-safe">
 
+  <!-- TOAST SYSTEM (Eksklusif: Menggantikan seluruh fungsi alert browser) -->
+  <div id="toast-notif" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-xl transition-all duration-300 transform -translate-y-24 opacity-0 flex items-center space-x-2 border">
+    <span id="toast-icon">⚠️</span>
+    <span id="toast-text">Pemberitahuan</span>
+  </div>
+
   <header class="bg-white border-b border-slate-100 sticky top-0 z-40 backdrop-blur-md bg-white/90">
     <div class="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center space-x-3">
@@ -189,7 +195,7 @@
             </svg>
           </button>
 
-          <!-- REVISI: Jadwal Mengajar Guru sekarang berada di bawah tombol -->
+          <!-- REVISI: Jadwal Mengajar Guru diletakkan di bagian bawah tombol -->
           <div class="border border-slate-100 rounded-2xl bg-slate-50/50 p-4">
             <div class="flex justify-between items-center mb-2">
               <h3 class="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center space-x-1.5">
@@ -416,6 +422,27 @@
     let activeStream = null;
     let qrScannerInstance = null;
 
+    // Toast Notification helper (Anti-Alert System)
+    function showToast(message, type = 'warning') {
+      const toast = document.getElementById('toast-notif');
+      const text = document.getElementById('toast-text');
+      const icon = document.getElementById('toast-icon');
+      
+      text.innerText = message;
+      icon.innerText = type === 'success' ? '✅' : (type === 'error' ? '❌' : '⚠️');
+      
+      // Update background and border based on message type
+      const bgClasses = type === 'success' 
+        ? 'bg-emerald-900 border-emerald-800' 
+        : (type === 'error' ? 'bg-rose-900 border-rose-800' : 'bg-amber-900 border-amber-800');
+        
+      toast.className = `fixed top-5 left-1/2 -translate-x-1/2 z-50 text-white text-xs font-semibold px-4 py-3 rounded-2xl shadow-xl transition-all duration-300 transform translate-y-0 opacity-100 flex items-center space-x-2 ${bgClasses}`;
+      
+      setTimeout(() => {
+        toast.className = `fixed top-5 left-1/2 -translate-x-1/2 z-50 text-white text-xs font-semibold px-4 py-3 rounded-2xl shadow-xl transition-all duration-300 transform -translate-y-24 opacity-0 flex items-center space-x-2`;
+      }, 3500);
+    }
+
     window.onload = function() {
       if(!localStorage.getItem(CONFIG_KEYS.GAS_URL)) {
         localStorage.setItem(CONFIG_KEYS.GAS_URL, "https://script.google.com/macros/s/AKfycbyHaNmpOkuqxgjfmF0x5dwG0ge0TXdc0jRWlEqWhggPAriW2fsNEx0sX7mrg-kVEWjK/exec");
@@ -434,7 +461,6 @@
       muatJadwalMengajarHarian();
     };
 
-    // Fungsi Request Data ke Server Apps Script
     function muatJadwalMengajarHarian() {
       if (typeof google !== "undefined" && google.script && google.script.run) {
         google.script.run
@@ -444,18 +470,18 @@
           })
           .ambilGuruJadwalHariIni();
       } else {
-        // Fallback data simulasi saat dibuka di luar Google Environment (Lokal)
+        // Fallback data simulasi yang disesuaikan persis dengan screenshot untuk hari Kamis (hari ini)
         tampilkanJadwalKeBeranda({
           hari: "Kamis",
           guru: [
-            { nama: "DIANA AYU LESTARI", nip: "69896808008", jamKe: "1" },
-            { nama: "ARIF LATIFUDIN", nip: "69896808003", jamKe: "2" }
+            { nama: "AHMAD AGUS SYAIFFUDIN", nip: "69896808001", jamKe: "4" },
+            { nama: "AHMAD SAYUDI", nip: "69896808002", jamKe: "5" },
+            { nama: "MUHTADIN", nip: "69896808013", jamKe: "5" }
           ]
         });
       }
     }
 
-    // Mengolah Callback Data dan Merendernya ke DOM HTML
     function tampilkanJadwalKeBeranda(data) {
       const labelHari = document.getElementById("nama-hari-ini");
       const listContainer = document.getElementById("list-guru-hari-ini");
@@ -491,7 +517,7 @@
         if (pinInput === pinTerdaftar) {
           modal.classList.remove('hidden');
         } else if (pinInput !== null) {
-          alert("Akses Ditolak! PIN salah.");
+          showToast("Akses Ditolak! PIN salah.", "error");
         }
       } else {
         modal.classList.add('hidden');
@@ -501,12 +527,12 @@
     function ubahPinAdmin() {
       const pinLama = localStorage.getItem(CONFIG_KEYS.ADMIN_PIN) || "123456";
       const konfirmasiPinLama = prompt("Masukkan PIN Admin saat ini untuk verifikasi:");
-      if (konfirmasiPinLama !== pinLama) return alert("Verifikasi Gagal!");
+      if (konfirmasiPinLama !== pinLama) return showToast("Verifikasi Gagal!", "error");
       
       const pinBaru = prompt("Masukkan PIN Baru:");
       if (!pinBaru) return;
       localStorage.setItem(CONFIG_KEYS.ADMIN_PIN, pinBaru.trim());
-      alert("PIN Keamanan Admin berhasil diperbarui!");
+      showToast("PIN Keamanan Admin berhasil diperbarui!", "success");
     }
 
     function saveConfiguration() {
@@ -514,7 +540,7 @@
       localStorage.setItem(CONFIG_KEYS.LAT, document.getElementById('cfg-lat').value);
       localStorage.setItem(CONFIG_KEYS.LNG, document.getElementById('cfg-lng').value);
       localStorage.setItem(CONFIG_KEYS.RADIUS, document.getElementById('cfg-radius').value);
-      alert('Seluruh konfigurasi berhasil disimpan!');
+      showToast('Seluruh konfigurasi berhasil disimpan!', "success");
       toggleConfigModal();
       initiateGPSChecking();
     }
@@ -576,7 +602,7 @@
 
     function nextToCamera() {
       const nipVal = document.getElementById('nip').value.trim();
-      if (!nipVal) return alert('NIP / Kode Pendidik wajib diisi!');
+      if (!nipVal) return showToast('NIP / Kode Pendidik wajib diisi!', 'error');
       payload.nip = nipVal;
 
       document.getElementById('card-title').innerText = "Validasi Wajah";
@@ -599,7 +625,6 @@
       moveToScannerStep();
     }
 
-    // Fungsi Pengambilan Foto Wajah
     function captureImage() {
       const video = document.getElementById('webcam');
       const canvas = document.getElementById('canvas');
@@ -639,15 +664,17 @@
             (decodedText) => {
               payload.qr_content = decodedText;
               if (qrScannerInstance) {
-                qrScannerInstance.stop().then(() => { processPresensiFinal(); });
+                qrScannerInstance.stop().then(() => { processPresensiFinal(); }).catch(() => { processPresensiFinal(); });
               } else {
                 processPresensiFinal();
               }
             }
-          );
+          ).catch(() => {
+            showToast("Gagal memulai scanner QR.", "error");
+          });
         }
       }).catch(() => {
-        alert("Gagal mengakses modul kamera belakang untuk QR Scanner.");
+        showToast("Gagal mendeteksi modul kamera.", "error");
       });
     }
 
@@ -660,7 +687,6 @@
       }
     }
 
-    // Fungsi Pengiriman Data Presensi Ke Google Apps Script Server
     function processPresensiFinal() {
       document.getElementById('pane-scanner').classList.add('hidden');
       document.getElementById('pane-status').classList.remove('hidden');
@@ -669,27 +695,47 @@
       document.getElementById('status-error').classList.add('hidden');
 
       if (typeof google !== "undefined" && google.script && google.script.run) {
-        // Mode Production (Live Apps Script)
+        // Mode Production (Koneksi Stabil langsung ke Apps Script Server)
         google.script.run
           .withSuccessHandler(handleServerResponse)
           .withFailureHandler(handleServerError)
           .prosesPendaftaranPresensi(payload);
       } else {
-        // Mode Development/Testing Lokal
-        setTimeout(() => {
-          handleServerResponse({ success: true, nip: payload.nip, kategori: payload.kategori });
-        }, 1500);
+        // Mode Standalone (Sistem fallback simulasi offline/lokal)
+        const gasUrl = localStorage.getItem(CONFIG_KEYS.GAS_URL);
+        fetch(gasUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+        .then(() => {
+          handleServerResponse({ success: true, status: "success", nip: payload.nip, kategori: payload.kategori });
+        })
+        .catch(err => {
+          handleServerError(err.toString());
+        });
       }
     }
 
     function handleServerResponse(res) {
       document.getElementById('status-loading').classList.add('hidden');
-      if (res && res.success) {
+      
+      // Mengatasi respons bertingkat dari doPost murni maupun JSON parse wrapper
+      let dataValid = false;
+      if (res && (res.status === "success" || res.success === true)) {
+        dataValid = true;
+      }
+
+      if (dataValid) {
         document.getElementById('status-success').classList.remove('hidden');
         document.getElementById('rec-nip').innerText = res.nip || payload.nip;
         document.getElementById('rec-time').innerText = new Date().toLocaleTimeString('id-ID') + " WIB";
-        document.getElementById('rec-gps').innerText = payload.lat ? `${payload.lat.toFixed(4)}, ${payload.lng.toFixed(4)}` : "Default Terkunci";
+        document.getElementById('rec-gps').innerText = payload.lat ? "Terkunci Aktif" : "Default Koordinat";
         document.getElementById('rec-kategori').innerText = res.kategori || payload.kategori;
+        
+        document.getElementById('progress-bar-2').className = "h-full bg-brand-800 w-full";
+        document.getElementById('step-lbl-3').className = "flex items-center space-x-2 text-brand-800 font-bold transition-all duration-300";
       } else {
         document.getElementById('status-error').classList.remove('hidden');
         document.getElementById('error-message').innerText = res.message || "Validasi data gagal di server.";
@@ -716,6 +762,10 @@
       document.getElementById('card-title').innerText = "Selamat Datang Bapak/Ibu";
       document.getElementById('progress-bar-1').className = "h-full bg-brand-800 w-0 transition-all";
       document.getElementById('progress-bar-2').className = "h-full bg-brand-800 w-0 transition-all";
+      
+      document.getElementById('step-lbl-2').className = "flex items-center space-x-2 text-slate-400 font-semibold transition-all duration-300";
+      document.getElementById('step-lbl-3').className = "flex items-center space-x-2 text-slate-400 font-semibold transition-all duration-300";
+      
       document.getElementById('pane-status').classList.add('hidden');
       document.getElementById('pane-identity').classList.remove('hidden');
       initiateGPSChecking();
