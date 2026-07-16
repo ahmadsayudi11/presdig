@@ -654,16 +654,28 @@
       }, 600);
     }
 
-    function simulateQRDecode() {
-      payload.qr_content = "BYPASS_MOCK_QR_CODE_SMK_2026";
-      showToast("Bypass QR diaktifkan.", "success");
-      if (qrScannerInstance) {
-        qrScannerInstance.stop().then(() => { processPresensiFinal(); }).catch(() => { processPresensiFinal(); });
-      } else {
-        processPresensiFinal();
-      }
+ function simulateQRDecode() {
+  // Ambil PIN yang terdaftar di localStorage (default: 123456)
+  const pinTerdaftar = localStorage.getItem(CONFIG_KEYS.ADMIN_PIN) || "123456";
+  
+  // Minta verifikasi PIN ke pengguna
+  const pinInput = prompt("Masukkan PIN Keamanan Admin untuk Bypass QR:");
+  
+  if (pinInput === pinTerdaftar) {
+    payload.qr_content = "BYPASS_MOCK_QR_CODE_SMK_2026";
+    showToast("Bypass QR disetujui oleh Admin.", "success");
+    
+    if (qrScannerInstance) {
+      qrScannerInstance.stop()
+        .then(() => { processPresensiFinal(); })
+        .catch(() => { processPresensiFinal(); });
+    } else {
+      processPresensiFinal();
     }
-
+  } else if (pinInput !== null) {
+    showToast("Bypass Ditolak! PIN salah.", "error");
+  }
+}
     // ==========================================
     // FUNGSI PENDUKUNG LAINNYA
     // ==========================================
