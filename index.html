@@ -460,26 +460,46 @@
       initiateGPSChecking();
       muatJadwalMengajarHarian();
     };
+    
+function muatJadwalMengajarHarian() {
+      const listContainer = document.getElementById("list-guru-hari-ini");
+      const urlGas = localStorage.getItem(CONFIG_KEYS.GAS_URL);
 
-    function muatJadwalMengajarHarian() {
-      if (typeof google !== "undefined" && google.script && google.script.run) {
-        google.script.run
-          .withSuccessHandler(tampilkanJadwalKeBeranda)
-          .withFailureHandler(function(err) {
-            document.getElementById("list-guru-hari-ini").innerHTML = "<li class='text-center py-4 text-rose-500'>Gagal memuat jadwal dari sheet.</li>";
-          })
-          .ambilGuruJadwalHariIni();
-      } else {
-        // Fallback data simulasi yang disesuaikan persis dengan screenshot untuk hari Kamis (hari ini)
+      if (!urlGas) {
+        listContainer.innerHTML = "<li class='text-center py-4 text-amber-500'>URL Web App belum diatur di Pengaturan.</li>";
+        return;
+      }
+
+      // Tampilkan status memuat data
+      listContainer.innerHTML = "<li class='text-center py-4 text-slate-400 animate-pulse'>Menghubungkan ke server Google Sheets...</li>";
+
+      // Memanggil Google Apps Script (doGet) menggunakan fetch dengan bypass cache (?t=...)
+      fetch(`${urlGas}?t=${new Date().getTime()}`, {
+        method: "GET"
+      })
+      .then(response => {
+        if (!response.ok) throw new Error("Jaringan bermasalah");
+        return response.json();
+      })
+      .then(data => {
+        // Panggil fungsi pembentuk elemen HTML yang sudah ada
+        tampilkanJadwalKeBeranda(data);
+      })
+      .catch(error => {
+        console.error("Detail Error:", error);
+        
+        // JIKA LURING/GAGAL: Tampilkan data cadangan (Simulasi) agar aplikasi tidak crash
         tampilkanJadwalKeBeranda({
-          hari: "Kamis",
+          hari: "Kamis (Offline)",
           guru: [
             { nama: "AHMAD AGUS SYAIFFUDIN", nip: "69896808001", jamKe: "4" },
             { nama: "AHMAD SAYUDI", nip: "69896808002", jamKe: "5" },
             { nama: "MUHTADIN", nip: "69896808013", jamKe: "5" }
           ]
         });
-      }
+        
+        showToast("Gagal mengambil jadwal terbaru, menampilkan data offline.", "warning");
+      });
     }
 
     function tampilkanJadwalKeBeranda(data) {
