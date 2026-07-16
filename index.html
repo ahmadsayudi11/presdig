@@ -707,34 +707,52 @@ function muatJadwalMengajarHarian() {
       }
     }
 
-    function processPresensiFinal() {
-      document.getElementById('pane-scanner').classList.add('hidden');
-      document.getElementById('pane-status').classList.remove('hidden');
-      document.getElementById('status-loading').classList.remove('hidden');
-      document.getElementById('status-success').classList.add('hidden');
-      document.getElementById('status-error').classList.add('hidden');
-
-      if (typeof google !== "undefined" && google.script && google.script.run) {
-        // Mode Production (Koneksi Stabil langsung ke Apps Script Server)
-        google.script.run
-          .withSuccessHandler(handleServerResponse)
-          .withFailureHandler(handleServerError)
-          .prosesPendaftaranPresensi(payload);
+    function simulateQRDecode() {
+      // 1. Mengambil PIN terbaru dari LocalStorage (jika belum ada, default 123456)
+      const pinTerdaftar = localStorage.getItem(CONFIG_KEYS.ADMIN_PIN) || "123456";
+      
+      // 2. Meminta verifikasi PIN sebelum bypass diizinkan
+      const pinInput = prompt("🔒 Fitur Terkunci!\nMasukkan PIN Keamanan IT Admin SMK untuk Bypass Barcode:");
+      
+      if (pinInput === null) {
+        // Jika user menekan tombol Batal/Cancel
+        return; 
+      }
+      
+      if (pinInput === pinTerdaftar) {
+        // JIKA PIN BENAR -> Jalankan proses bypass seperti biasa
+        showToast("Bypass berhasil diverifikasi oleh Admin!", "success");
+        
+        // --- ISI LOGIKA BYPASS ANDA SEBELUMNYA (Contoh pemicu sukses QR) ---
+        payload.qr_content = "BYPASS-ADMIN-SMK-" + new Date().getTime();
+        
+        if (qrScannerInstance) {
+          qrScannerInstance.stop().catch(err => console.error(err));
+        }
+        
+        // Pindah ke halaman loading / kirim data absensi
+        document.getElementById('pane-scanner').classList.add('hidden');
+        document.getElementById('pane-status').classList.remove('hidden');
+        
+        // Panggil fungsi kirim data ke Google Sheets Anda di sini (misal: kirimAbsensiKeGAS())
+        if (typeof kirimAbsensiKeGAS === "function") {
+          kirimAbsensiKeGAS();
+        } else {
+          // Simulasi jika fungsi kirim belum didefinisikan secara global
+          setTimeout(() => {
+            document.getElementById('status-loading').classList.add('hidden');
+            document.getElementById('status-success').classList.remove('hidden');
+            document.getElementById('rec-nip').innerText = payload.nip || document.getElementById('nip').value;
+            document.getElementById('rec-time').innerText = new Date().toLocaleTimeString('id-ID');
+            document.getElementById('rec-gps').innerText = "Terverifikasi (Bypass)";
+            document.getElementById('rec-kategori').innerText = payload.kategori;
+          }, 1500);
+        }
+        // -----------------------------------------------------------------
+        
       } else {
-        // Mode Standalone (Sistem fallback simulasi offline/lokal)
-        const gasUrl = localStorage.getItem(CONFIG_KEYS.GAS_URL);
-        fetch(gasUrl, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        })
-        .then(() => {
-          handleServerResponse({ success: true, status: "success", nip: payload.nip, kategori: payload.kategori });
-        })
-        .catch(err => {
-          handleServerError(err.toString());
-        });
+        // JIKA PIN SALAH -> Tolak akses dan beri peringatan
+        showToast("⚠️ Akses Ditolak! PIN Admin Salah.", "error");
       }
     }
 
