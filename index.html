@@ -81,7 +81,7 @@
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800 font-sans flex flex-col antialiased selection:bg-brand-200 overflow-x-hidden pb-safe">
 
-  <!-- TOAST SYSTEM (Eksklusif: Menggantikan seluruh fungsi alert browser) -->
+  <!-- TOAST SYSTEM -->
   <div id="toast-notif" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-xl transition-all duration-300 transform -translate-y-24 opacity-0 flex items-center space-x-2 border">
     <span id="toast-icon">⚠️</span>
     <span id="toast-text">Pemberitahuan</span>
@@ -144,6 +144,7 @@
 
       <div class="p-6">
         
+        <!-- PANE IDENTITY -->
         <div id="pane-identity" class="space-y-5">
           <div class="space-y-2">
             <label for="nip" class="block text-xs font-bold text-slate-500 uppercase tracking-wider">NIP / Kode Pendidik</label>
@@ -187,7 +188,6 @@
             <span id="gps-message">Menghubungkan satelit GPS untuk verifikasi wilayah sekolah...</span>
           </div>
 
-          <!-- REVISI: Tombol Verifikasi ditaruh TEPAT di bawah GPS -->
           <button onclick="nextToCamera()" class="shimmer w-full bg-brand-800 hover:bg-brand-900 active:scale-[0.98] text-white font-bold py-3.5 px-4 rounded-2xl transition-all shadow-lg shadow-brand-200 flex items-center justify-center space-x-2 text-sm">
             <span>Mulai Verifikasi</span>
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -195,7 +195,6 @@
             </svg>
           </button>
 
-          <!-- REVISI: Jadwal Mengajar Guru diletakkan di bagian bawah tombol -->
           <div class="border border-slate-100 rounded-2xl bg-slate-50/50 p-4">
             <div class="flex justify-between items-center mb-2">
               <h3 class="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center space-x-1.5">
@@ -211,6 +210,7 @@
           </div>
         </div>
 
+        <!-- PANE CAMERA (Kamera Depan) -->
         <div id="pane-camera" class="space-y-4 hidden">
           <div class="relative bg-slate-950 rounded-2xl overflow-hidden aspect-[4/3] flex items-center justify-center border border-slate-800">
             <video id="webcam" autoplay playsinline class="w-full h-full object-cover scale-x-[-1]"></video>
@@ -255,8 +255,10 @@
           </button>
         </div>
 
+        <!-- PANE SCANNER (Kamera Belakang QR) -->
         <div id="pane-scanner" class="space-y-4 hidden">
-          <div class="relative bg-slate-950 rounded-2xl overflow-hidden aspect-square border border-slate-800 max-w-[280px] mx-auto">
+          <!-- PERBAIKAN: Melepas max-width kaku agar engine scanner mendapat rasio bidang render yang tepat -->
+          <div class="relative bg-slate-950 rounded-2xl overflow-hidden aspect-square border border-slate-800 w-full mx-auto">
             <div id="reader" class="w-full h-full bg-slate-950"></div>
             <div class="absolute inset-x-0 h-[2px] bg-brand-500 shadow-lg shadow-brand-500 scanner-line pointer-events-none"></div>
             <div class="absolute inset-0 border-2 border-brand-500/20 m-12 rounded-xl pointer-events-none flex items-center justify-center">
@@ -284,6 +286,7 @@
           </div>
         </div>
 
+        <!-- PANE STATUS -->
         <div id="pane-status" class="space-y-5 hidden py-6 text-center">
           <div id="status-loading" class="space-y-4">
             <div class="inline-flex relative">
@@ -348,6 +351,7 @@
     </div>
   </main>
 
+  <!-- CONFIG MODAL -->
   <div id="config-modal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-3xl max-w-sm w-full border border-slate-100 shadow-2xl overflow-hidden">
       <div class="bg-gradient-to-r from-slate-900 to-slate-800 p-5 text-white flex justify-between items-center">
@@ -422,7 +426,6 @@
     let activeStream = null;
     let qrScannerInstance = null;
 
-    // Toast Notification helper (Anti-Alert System)
     function showToast(message, type = 'warning') {
       const toast = document.getElementById('toast-notif');
       const text = document.getElementById('toast-text');
@@ -431,7 +434,6 @@
       text.innerText = message;
       icon.innerText = type === 'success' ? '✅' : (type === 'error' ? '❌' : '⚠️');
       
-      // Update background and border based on message type
       const bgClasses = type === 'success' 
         ? 'bg-emerald-900 border-emerald-800' 
         : (type === 'error' ? 'bg-rose-900 border-rose-800' : 'bg-amber-900 border-amber-800');
@@ -443,9 +445,7 @@
       }, 3500);
     }
 
-    // GANTI window.onload LAMA DENGAN INI
     document.addEventListener("DOMContentLoaded", function() {
-      // 1. Muat konfigurasi dasar secara instan dari LocalStorage
       if(!localStorage.getItem(CONFIG_KEYS.GAS_URL)) {
         localStorage.setItem(CONFIG_KEYS.GAS_URL, "https://script.google.com/macros/s/AKfycbyHaNmpOkuqxgjfmF0x5dwG0ge0TXdc0jRWlEqWhggPAriW2fsNEx0sX7mrg-kVEWjK/exec");
         localStorage.setItem(CONFIG_KEYS.LAT, "-7.0554952");
@@ -459,12 +459,11 @@
       document.getElementById('cfg-lng').value = localStorage.getItem(CONFIG_KEYS.LNG);
       document.getElementById('cfg-radius').value = localStorage.getItem(CONFIG_KEYS.RADIUS);
 
-      // 2. Jalankan penarikan data secara paralel (tidak memblokir rendering halaman)
       setTimeout(muatJadwalMengajarHarian, 50);
       setTimeout(initiateGPSChecking, 200);
     });
   
-function muatJadwalMengajarHarian() {
+    function muatJadwalMengajarHarian() {
       const listContainer = document.getElementById("list-guru-hari-ini");
       const urlGas = localStorage.getItem(CONFIG_KEYS.GAS_URL);
 
@@ -473,10 +472,8 @@ function muatJadwalMengajarHarian() {
         return;
       }
 
-      // Tampilkan status memuat data
       listContainer.innerHTML = "<li class='text-center py-4 text-slate-400 animate-pulse'>Menghubungkan ke server Google Sheets...</li>";
 
-      // Memanggil Google Apps Script (doGet) menggunakan fetch dengan bypass cache (?t=...)
       fetch(`${urlGas}?t=${new Date().getTime()}`, {
         method: "GET"
       })
@@ -485,13 +482,10 @@ function muatJadwalMengajarHarian() {
         return response.json();
       })
       .then(data => {
-        // Panggil fungsi pembentuk elemen HTML yang sudah ada
         tampilkanJadwalKeBeranda(data);
       })
       .catch(error => {
         console.error("Detail Error:", error);
-        
-        // JIKA LURING/GAGAL: Tampilkan data cadangan (Simulasi) agar aplikasi tidak crash
         tampilkanJadwalKeBeranda({
           hari: "Kamis (Offline)",
           guru: [
@@ -500,7 +494,6 @@ function muatJadwalMengajarHarian() {
             { nama: "MUHTADIN", nip: "69896808013", jamKe: "5" }
           ]
         });
-        
         showToast("Gagal mengambil jadwal terbaru, menampilkan data offline.", "warning");
       });
     }
@@ -532,6 +525,206 @@ function muatJadwalMengajarHarian() {
       });
     }
 
+    // ==========================================
+    // ALUR LOGIKA UTAMA KAMERA & QR SCANNER (REVISI TOTAL)
+    // ==========================================
+
+    function nextToCamera() {
+      const nipInput = document.getElementById('nip').value.trim();
+      if(!nipInput) {
+        showToast("NIP wajib diisi sebelum verifikasi!", "error");
+        return;
+      }
+      payload.nip = nipInput;
+
+      document.getElementById('pane-identity').classList.add('hidden');
+      document.getElementById('pane-camera').classList.remove('hidden');
+      document.getElementById('card-title').innerText = "Verifikasi Wajah";
+      document.getElementById('card-desc').innerText = "Posisikan wajah Anda pada kamera depan.";
+      document.getElementById('progress-bar-1').className = "h-full bg-brand-800 w-full transition-all duration-500";
+      
+      // Nyalakan kamera depan
+      navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } }
+      })
+      .then(stream => {
+        activeStream = stream;
+        document.getElementById('webcam').srcObject = stream;
+      })
+      .catch(err => {
+        console.error(err);
+        document.getElementById('camera-fallback-control').classList.remove('hidden');
+        showToast("Kamera depan terhambat. Anda bisa gunakan snapshot cadangan.", "warning");
+      });
+    }
+
+    function captureImage() {
+      const video = document.getElementById('webcam');
+      const canvas = document.getElementById('canvas');
+      
+      if (activeStream && video.readyState === video.HAVE_ENOUGH_DATA) {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+        payload.image = canvas.toDataURL('image/jpeg', 0.7);
+        
+        // Matikan total kamera depan & hapus object video stream
+        activeStream.getTracks().forEach(track => track.stop());
+        video.srcObject = null; 
+        activeStream = null;
+      } else {
+        useMockFaceImage();
+        return;
+      }
+      
+      // Pindahkan Tampilan UI ke Panel Scanner QR
+      document.getElementById('card-title').innerText = "Pindai QR Monitor";
+      document.getElementById('card-desc').innerText = "Gunakan kamera belakang untuk memindai kode QR.";
+      document.getElementById('progress-bar-2').className = "h-full bg-brand-800 w-full transition-all duration-500";
+      document.getElementById('pane-camera').classList.add('hidden');
+      document.getElementById('pane-scanner').classList.remove('hidden');
+
+      // BERI JEDA AMAN: Menunggu 600ms agar Android tuntas melepaskan resource kamera depan
+      setTimeout(() => {
+        startQRScanner();
+      }, 600);
+    }
+
+    function startQRScanner() {
+      if (qrScannerInstance) {
+        try { qrScannerInstance.clear(); } catch(e){}
+      }
+
+      Html5Qrcode.getCameras().then(devices => {
+        if (devices && devices.length > 0) {
+          // Cari kamera belakang secara komprehensif
+          let backCamera = devices.find(device => 
+            device.label.toLowerCase().includes('back') || 
+            device.label.toLowerCase().includes('environment') ||
+            device.label.toLowerCase().includes('belakang') ||
+            device.label.toLowerCase().includes('rear')
+          );
+          
+          const cameraIdToUse = backCamera ? backCamera.id : devices[devices.length - 1].id;
+          
+          qrScannerInstance = new Html5Qrcode("reader");
+          qrScannerInstance.start(
+            cameraIdToUse, 
+            { 
+              fps: 15, 
+              qrbox: function(viewfinderWidth, viewfinderHeight) {
+                // Menghitung ukuran kotak scan adaptif agar pas di layar HP
+                const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+                return { width: Math.floor(minEdge * 0.7), height: Math.floor(minEdge * 0.7) };
+              }
+            },
+            (decodedText) => {
+              payload.qr_content = decodedText;
+              if (qrScannerInstance) {
+                qrScannerInstance.stop()
+                  .then(() => { processPresensiFinal(); })
+                  .catch(() => { processPresensiFinal(); });
+              } else {
+                processPresensiFinal();
+              }
+            }
+          ).catch((err) => {
+            console.error("Gagal inisialisasi modul kamera belakang:", err);
+            showToast("Kamera belakang sibuk. Klik 'Bypass QR' jika tetap macet.", "error");
+          });
+        } else {
+          showToast("Tidak ada modul kamera belakang terdeteksi.", "error");
+        }
+      }).catch((err) => {
+        console.error("Gagal deteksi modul:", err);
+        showToast("Hak akses kamera diblokir browser.", "error");
+      });
+    }
+
+    function useMockFaceImage() {
+      payload.image = "DATA_IMAGE_MOCK_FALLBACK";
+      showToast("Menggunakan snapshot cadangan.", "success");
+      
+      document.getElementById('card-title').innerText = "Pindai QR Monitor";
+      document.getElementById('pane-camera').classList.add('hidden');
+      document.getElementById('pane-scanner').classList.remove('hidden');
+      
+      setTimeout(() => {
+        startQRScanner();
+      }, 600);
+    }
+
+    function simulateQRDecode() {
+      payload.qr_content = "BYPASS_MOCK_QR_CODE_SMK_2026";
+      showToast("Bypass QR diaktifkan.", "success");
+      if (qrScannerInstance) {
+        qrScannerInstance.stop().then(() => { processPresensiFinal(); }).catch(() => { processPresensiFinal(); });
+      } else {
+        processPresensiFinal();
+      }
+    }
+
+    // ==========================================
+    // FUNGSI PENDUKUNG LAINNYA
+    // ==========================================
+
+    function initiateGPSChecking() {
+      const msgGps = document.getElementById('gps-message');
+      const boxGps = document.getElementById('gps-status');
+      
+      if(!navigator.geolocation) {
+        msgGps.innerText = "Perangkat Anda tidak mendukung fitur lokasi GPS.";
+        return;
+      }
+      
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          payload.lat = pos.coords.latitude;
+          payload.lng = pos.coords.longitude;
+          
+          boxGps.className = "flex items-center space-x-3 bg-emerald-50 text-emerald-800 p-3.5 rounded-2xl border border-emerald-100 text-xs font-medium";
+          msgGps.innerHTML = `GPS Terkunci: <b>${payload.lat.toFixed(5)}, ${payload.lng.toFixed(5)}</b> (Siap Kirim)`;
+        },
+        (err) => {
+          msgGps.innerText = "Gagal mengunci GPS. Pastikan izin lokasi aktif.";
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    }
+
+    function processPresensiFinal() {
+      document.getElementById('pane-scanner').classList.add('hidden');
+      document.getElementById('pane-status').classList.remove('hidden');
+      document.getElementById('status-loading').classList.remove('hidden');
+      document.getElementById('status-success').classList.add('hidden');
+      document.getElementById('status-error').classList.add('hidden');
+      document.getElementById('card-title').innerText = "Status Pengiriman";
+
+      const urlGas = localStorage.getItem(CONFIG_KEYS.GAS_URL);
+      
+      fetch(urlGas, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      .then(() => {
+        document.getElementById('status-loading').classList.add('hidden');
+        document.getElementById('status-success').classList.remove('hidden');
+        
+        document.getElementById('rec-nip').innerText = payload.nip;
+        document.getElementById('rec-time').innerText = new Date().toLocaleTimeString('id-ID') + " WIB";
+        document.getElementById('rec-gps').innerText = payload.lat ? "VALID (TERKUNCI)" : "OFFLINE/MOCK";
+        document.getElementById('rec-kategori').innerText = payload.kategori.toUpperCase();
+        showToast("Data presensi sukses terkirim ke server!", "success");
+      })
+      .catch((err) => {
+        document.getElementById('status-loading').classList.add('hidden');
+        document.getElementById('status-error').classList.remove('hidden');
+        document.getElementById('error-message').innerText = err.message || "Gangguan jaringan internet.";
+      });
+    }
+
     function toggleConfigModal() {
       const modal = document.getElementById('config-modal');
       if (modal.classList.contains('hidden')) {
@@ -550,7 +743,7 @@ function muatJadwalMengajarHarian() {
     function ubahPinAdmin() {
       const pinLama = localStorage.getItem(CONFIG_KEYS.ADMIN_PIN) || "123456";
       const konfirmasiPinLama = prompt("Masukkan PIN Admin saat ini untuk verifikasi:");
-      if (konfirmasiPinLama !== pinLama) return showToast("Verifikasi Gagal!", "error");
+      if (confirmasiPinLama !== pinLama) return showToast("Verifikasi Gagal!", "error");
       
       const pinBaru = prompt("Masukkan PIN Baru:");
       if (!pinBaru) return;
@@ -581,242 +774,6 @@ function muatJadwalMengajarHarian() {
       }
     }
 
-    function initiateGPSChecking() {
-      const gpsBox = document.getElementById('gps-status');
-      const gpsMsg = document.getElementById('gps-message');
-      if (!navigator.geolocation) {
-        gpsMsg.innerText = "Browser tidak mendukung Geolocation.";
-        return;
-      }
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          payload.lat = position.coords.latitude;
-          payload.lng = position.coords.longitude;
-          const targetLat = parseFloat(localStorage.getItem(CONFIG_KEYS.LAT));
-          const targetLng = parseFloat(localStorage.getItem(CONFIG_KEYS.LNG));
-          const limitRadius = parseFloat(localStorage.getItem(CONFIG_KEYS.RADIUS));
-          const dist = calculateDistance(payload.lat, payload.lng, targetLat, targetLng) * 1000;
-
-          if (dist <= limitRadius) {
-            gpsBox.className = "flex items-center space-x-3 bg-emerald-50 text-emerald-800 p-3.5 rounded-2xl border border-emerald-100 text-xs font-medium";
-            gpsMsg.innerText = `Di dalam radius wilayah sekolah (${Math.round(dist)} meter).`;
-          } else {
-            gpsBox.className = "flex items-center space-x-3 bg-amber-50 text-amber-800 p-3.5 rounded-2xl border border-amber-100 text-xs font-medium";
-            gpsMsg.innerText = `Di luar radius wilayah sekolah (${Math.round(dist)}m).`;
-          }
-        },
-        () => {
-          gpsMsg.innerText = "Gagal membaca GPS. Menggunakan koordinat default sekolah.";
-          payload.lat = parseFloat(localStorage.getItem(CONFIG_KEYS.LAT));
-          payload.lng = parseFloat(localStorage.getItem(CONFIG_KEYS.LNG));
-        },
-        { enableHighAccuracy: true, timeout: 5000 }
-      );
-    }
-
-    function calculateDistance(lat1, lon1, lat2, lon2) {
-      const R = 6371;
-      const dLat = (lat2 - lat1) * Math.PI / 180;
-      const dLon = (lon2 - lon1) * Math.PI / 180;
-      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
-      return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
-    }
-
-    function nextToCamera() {
-      const nipVal = document.getElementById('nip').value.trim();
-      if (!nipVal) return showToast('NIP / Kode Pendidik wajib diisi!', 'error');
-      payload.nip = nipVal;
-
-      document.getElementById('card-title').innerText = "Validasi Wajah";
-      document.getElementById('progress-bar-1').className = "h-full bg-brand-800 w-full transition-all duration-500";
-      document.getElementById('pane-identity').classList.add('hidden');
-      document.getElementById('pane-camera').classList.remove('hidden');
-
-      navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
-        .then(stream => {
-          activeStream = stream;
-          document.getElementById('webcam').srcObject = stream;
-        })
-        .catch(() => {
-          document.getElementById('camera-fallback-control').classList.remove('hidden');
-        });
-    }
-
-    function useMockFaceImage() {
-      payload.image = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><circle cx='50' cy='50' r='40' fill='purple'/></svg>";
-      moveToScannerStep();
-    }
-function captureImage() {
-      const video = document.getElementById('webcam');
-      const canvas = document.getElementById('canvas');
-      
-      if (activeStream && video.readyState === video.HAVE_ENOUGH_DATA) {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-        payload.image = canvas.toDataURL('image/jpeg', 0.7);
-        
-        // 1. Matikan kamera depan secara total dan lepaskan object video
-        activeStream.getTracks().forEach(track => track.stop());
-        video.srcObject = null; 
-        activeStream = null;
-      } else {
-        useMockFaceImage();
-        return;
-      }
-      
-      // 2. Ubah UI Halaman ke Langkah Scanner QR
-      document.getElementById('card-title').innerText = "Pindai QR Monitor";
-      document.getElementById('progress-bar-2').className = "h-full bg-brand-800 w-full transition-all duration-500";
-      document.getElementById('pane-camera').classList.add('hidden');
-      document.getElementById('pane-scanner').classList.remove('hidden');
-
-      // 3. KRUSIAL: Beri jeda 500ms agar hardware kamera aman sebelum mendeteksi lensa baru
-      setTimeout(() => {
-        startQRScanner();
-      }, 500);
-    }
-
-    function startQRScanner() {
-      // Bersihkan instance lama jika ada sisa memory tertinggal
-      if (qrScannerInstance) {
-        try { qrScannerInstance.clear(); } catch(e){}
-      }
-
-      Html5Qrcode.getCameras().then(devices => {
-        if (devices && devices.length > 0) {
-          // Cari kamera belakang berdasarkan kata kunci umum di Android
-          let backCamera = devices.find(device => 
-            device.label.toLowerCase().includes('back') || 
-            device.label.toLowerCase().includes('environment') ||
-            device.label.toLowerCase().includes('belakang') ||
-            device.label.toLowerCase().includes('rear')
-          );
-          
-          // Jika tidak ketemu kata kuncinya, ambil kamera paling terakhir di daftar device HP
-          const cameraIdToUse = backCamera ? backCamera.id : devices[devices.length - 1].id;
-          
-          qrScannerInstance = new Html5Qrcode("reader");
-          qrScannerInstance.start(
-            cameraIdToUse, 
-            { 
-              fps: 15, 
-              qrbox: 220,
-              aspectRatio: 1.0 // Membuat frame square agar beban kerja modul kamera lebih ringan
-            },
-            (decodedText) => {
-              payload.qr_content = decodedText;
-              
-              // Matikan kamera belakang terlebih dahulu sebelum memproses data presensi final
-              if (qrScannerInstance) {
-                qrScannerInstance.stop()
-                  .then(() => { processPresensiFinal(); })
-                  .catch(() => { processPresensiFinal(); });
-              } else {
-                processPresensiFinal();
-              }
-            }
-          ).catch((err) => {
-            console.error("Gagal start scanner:", err);
-            showToast("Gagal memulai scanner QR. Coba refresh halaman.", "error");
-          });
-        } else {
-          showToast("Tidak ada modul kamera yang terdeteksi.", "warning");
-        }
-      }).catch((err) => {
-        console.error("Gagal get cameras:", err);
-        showToast("Gagal mendeteksi modul kamera sekolah.", "error");
-      });
-    }
-    function simulateQRDecode() {
-      payload.qr_content = "BYPASS_MONITOR_SMK_MIFTAHUL_HIKMAH";
-      if (qrScannerInstance) {
-        qrScannerInstance.stop().then(() => { processPresensiFinal(); }).catch(() => { processPresensiFinal(); });
-      } else {
-        processPresensiFinal();
-      }
-    }
-
-    function simulateQRDecode() {
-      // 1. Mengambil PIN terbaru dari LocalStorage (jika belum ada, default 123456)
-      const pinTerdaftar = localStorage.getItem(CONFIG_KEYS.ADMIN_PIN) || "123456";
-      
-      // 2. Meminta verifikasi PIN sebelum bypass diizinkan
-      const pinInput = prompt("🔒 Fitur Terkunci!\nMasukkan PIN Keamanan IT Admin SMK untuk Bypass Barcode:");
-      
-      if (pinInput === null) {
-        // Jika user menekan tombol Batal/Cancel
-        return; 
-      }
-      
-      if (pinInput === pinTerdaftar) {
-        // JIKA PIN BENAR -> Jalankan proses bypass seperti biasa
-        showToast("Bypass berhasil diverifikasi oleh Admin!", "success");
-        
-        // --- ISI LOGIKA BYPASS ANDA SEBELUMNYA (Contoh pemicu sukses QR) ---
-        payload.qr_content = "BYPASS-ADMIN-SMK-" + new Date().getTime();
-        
-        if (qrScannerInstance) {
-          qrScannerInstance.stop().catch(err => console.error(err));
-        }
-        
-        // Pindah ke halaman loading / kirim data absensi
-        document.getElementById('pane-scanner').classList.add('hidden');
-        document.getElementById('pane-status').classList.remove('hidden');
-        
-        // Panggil fungsi kirim data ke Google Sheets Anda di sini (misal: kirimAbsensiKeGAS())
-        if (typeof kirimAbsensiKeGAS === "function") {
-          kirimAbsensiKeGAS();
-        } else {
-          // Simulasi jika fungsi kirim belum didefinisikan secara global
-          setTimeout(() => {
-            document.getElementById('status-loading').classList.add('hidden');
-            document.getElementById('status-success').classList.remove('hidden');
-            document.getElementById('rec-nip').innerText = payload.nip || document.getElementById('nip').value;
-            document.getElementById('rec-time').innerText = new Date().toLocaleTimeString('id-ID');
-            document.getElementById('rec-gps').innerText = "Terverifikasi (Bypass)";
-            document.getElementById('rec-kategori').innerText = payload.kategori;
-          }, 1500);
-        }
-        // -----------------------------------------------------------------
-        
-      } else {
-        // JIKA PIN SALAH -> Tolak akses dan beri peringatan
-        showToast("⚠️ Akses Ditolak! PIN Admin Salah.", "error");
-      }
-    }
-
-    function handleServerResponse(res) {
-      document.getElementById('status-loading').classList.add('hidden');
-      
-      // Mengatasi respons bertingkat dari doPost murni maupun JSON parse wrapper
-      let dataValid = false;
-      if (res && (res.status === "success" || res.success === true)) {
-        dataValid = true;
-      }
-
-      if (dataValid) {
-        document.getElementById('status-success').classList.remove('hidden');
-        document.getElementById('rec-nip').innerText = res.nip || payload.nip;
-        document.getElementById('rec-time').innerText = new Date().toLocaleTimeString('id-ID') + " WIB";
-        document.getElementById('rec-gps').innerText = payload.lat ? "Terkunci Aktif" : "Default Koordinat";
-        document.getElementById('rec-kategori').innerText = res.kategori || payload.kategori;
-        
-        document.getElementById('progress-bar-2').className = "h-full bg-brand-800 w-full";
-        document.getElementById('step-lbl-3').className = "flex items-center space-x-2 text-brand-800 font-bold transition-all duration-300";
-      } else {
-        document.getElementById('status-error').classList.remove('hidden');
-        document.getElementById('error-message').innerText = res.message || "Validasi data gagal di server.";
-      }
-    }
-
-    function handleServerError(err) {
-      document.getElementById('status-loading').classList.add('hidden');
-      document.getElementById('status-error').classList.remove('hidden');
-      document.getElementById('error-message').innerText = err.toString();
-    }
-
     function retryQRScanner() {
       document.getElementById('pane-status').classList.add('hidden');
       document.getElementById('pane-scanner').classList.remove('hidden');
@@ -824,21 +781,7 @@ function captureImage() {
     }
 
     function resetFlow() {
-      document.getElementById('nip').value = "";
-      payload.nip = "";
-      payload.image = "";
-      payload.qr_content = "";
-      document.getElementById('card-title').innerText = "Selamat Datang Bapak/Ibu";
-      document.getElementById('progress-bar-1').className = "h-full bg-brand-800 w-0 transition-all";
-      document.getElementById('progress-bar-2').className = "h-full bg-brand-800 w-0 transition-all";
-      
-      document.getElementById('step-lbl-2').className = "flex items-center space-x-2 text-slate-400 font-semibold transition-all duration-300";
-      document.getElementById('step-lbl-3').className = "flex items-center space-x-2 text-slate-400 font-semibold transition-all duration-300";
-      
-      document.getElementById('pane-status').classList.add('hidden');
-      document.getElementById('pane-identity').classList.remove('hidden');
-      initiateGPSChecking();
-      muatJadwalMengajarHarian();
+      location.reload();
     }
   </script>
 </body>
