@@ -774,17 +774,35 @@
     }
 
     function updateKategoriStyle(pilihan) {
-      const lblMasuk = document.getElementById('lbl-masuk');
-      const lblPulang = document.getElementById('lbl-pulang');
-      payload.kategori = pilihan;
-      if (pilihan === 'Masuk') {
-        lblMasuk.className = "border-2 border-brand-800 bg-brand-50/50 rounded-2xl p-3 flex items-center space-x-3 cursor-pointer transition-all duration-200";
-        lblPulang.className = "border-2 border-slate-200 rounded-2xl p-3 flex items-center space-x-3 cursor-pointer transition-all duration-200";
-      } else {
-        lblPulang.className = "border-2 border-brand-800 bg-brand-50/50 rounded-2xl p-3 flex items-center space-x-3 cursor-pointer transition-all duration-200";
-        lblMasuk.className = "border-2 border-slate-200 rounded-2xl p-3 flex items-center space-x-3 cursor-pointer transition-all duration-200";
-      }
+  const lblMasuk = document.getElementById('lbl-masuk');
+  const lblPulang = document.getElementById('lbl-pulang');
+  
+  // --- VALIDASI JAM PULANG HARI JUMAT ---
+  if (pilihan === 'Pulang') {
+    const sekarang = new Date();
+    const hariIni = sekarang.getDay(); // 0 = Minggu, 5 = Jumat, 6 = Sabtu
+    const jamSekarang = sekarang.getHours();
+    
+    // Cek jika hari ini hari Jumat (5) dan belum jam 11 pagi
+    if (hariIni === 5 && jamSekarang < 11) {
+      showToast("Presensi Pulang Ditolak! Khusus hari Jumat, tombol pulang baru aktif mulai jam 11:00 WIB.", "error");
+      
+      // Kembalikan paksa radio button ke pilihan 'Masuk'
+      document.getElementsByName('kategori')[0].checked = true; 
+      return;
     }
+  }
+  // --------------------------------------
+
+  payload.kategori = pilihan;
+  if (pilihan === 'Masuk') {
+    lblMasuk.className = "border-2 border-brand-800 bg-brand-50/50 rounded-2xl p-3 flex items-center space-x-3 cursor-pointer transition-all duration-200";
+    lblPulang.className = "border-2 border-slate-200 rounded-2xl p-3 flex items-center space-x-3 cursor-pointer transition-all duration-200";
+  } else {
+    lblPulang.className = "border-2 border-brand-800 bg-brand-50/50 rounded-2xl p-3 flex items-center space-x-3 cursor-pointer transition-all duration-200";
+    lblMasuk.className = "border-2 border-slate-200 rounded-2xl p-3 flex items-center space-x-3 cursor-pointer transition-all duration-200";
+  }
+}
 
     function retryQRScanner() {
       document.getElementById('pane-status').classList.add('hidden');
